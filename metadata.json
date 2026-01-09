@@ -1,0 +1,7 @@
+{
+  "name": "HoopsStats AI Pro",
+  "description": "Next-gen basketball statistics tracker with AI-powered performance analysis and voice-driven data entry.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
