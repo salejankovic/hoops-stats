@@ -1,21 +1,16 @@
 
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { GameEntry, StorageConfig, SyncStatus, UserProfile } from '../types';
 
 const LOCAL_KEY = 'hoops_stats_data';
 const CONFIG_KEY = 'hoops_stats_config';
 const SYNC_KEY = 'hoops_stats_last_sync';
-const AUTH_KEY = 'hoops_stats_auth';
-
-// Hardcoded credentials for single user
-const VALID_USER = {
-  email: 'jankovic1998@gmail.com',
-  password: 'partiz4n'
-};
 
 type Listener<T> = (data: T) => void;
 
 class StorageService {
   private config: StorageConfig = { type: 'local' };
+  private client: SupabaseClient | null = null;
   private currentUser: UserProfile | null = null;
   private lastSync: string | null = localStorage.getItem(SYNC_KEY);
 
@@ -25,20 +20,49 @@ class StorageService {
   private syncListeners: Listener<string | null>[] = [];
 
   constructor() {
-    // Check if user is already logged in
-    const savedAuth = localStorage.getItem(AUTH_KEY);
-    if (savedAuth) {
-      try {
-        const auth = JSON.parse(savedAuth);
-        if (auth.email === VALID_USER.email) {
-          this.currentUser = { uid: 'single-user', email: auth.email };
+    // Initialize Supabase client with environment variables
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+    if (supabaseUrl && supabaseAnonKey) {
+      this.client = createClient(supabaseUrl, supabaseAnonKey);
+      this.config = {
+        type: 'supabase',
+        supabaseConfig: {
+          url: supabaseUrl,
+          anonKey: supabaseAnonKey,
+        },
+      };
+
+      // Check if user is already logged in
+      this.client.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user) {
+          this.currentUser = {
+            uid: session.user.id,
+            email: session.user.email || null,
+          };
+          this.notifyUserListeners(this.currentUser);
+          this.notifyStatusListeners('synced');
         }
-      } catch (e) {
-        console.error("Failed to load auth", e);
-      }
+      });
+
+      // Listen to auth state changes
+      this.client.auth.onAuthStateChange((event, session) => {
+        if (session?.user) {
+          this.currentUser = {
+            uid: session.user.id,
+            email: session.user.email || null,
+          };
+          this.notifyUserListeners(this.currentUser);
+          this.notifyStatusListeners('synced');
+        } else {
+          this.currentUser = null;
+          this.notifyUserListeners(null);
+          this.notifyStatusListeners('offline');
+        }
+      });
     }
   }
-
 
   onStatusChange(callback: Listener<SyncStatus>) {
     this.statusListeners.push(callback);
@@ -85,7 +109,6 @@ class StorageService {
     return this.lastSync;
   }
 
-  // Fix: Added missing getCurrentUser method required by App.tsx and SyncSettings.tsx
   getCurrentUser(): UserProfile | null {
     return this.currentUser;
   }
@@ -96,20 +119,37 @@ class StorageService {
     this.notifyConfigListeners(this.config);
   }
 
-  async signIn(email: string, pass: string) {
-    if (email === VALID_USER.email && pass === VALID_USER.password) {
-      this.currentUser = { uid: 'single-user', email: VALID_USER.email };
-      localStorage.setItem(AUTH_KEY, JSON.stringify({ email: VALID_USER.email }));
+  async signIn(email: string, password: string) {
+    if (!this.client) {
+      throw new Error('Supabase client not initialized');
+    }
+
+    const { data, error } = await this.client.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) throw error;
+
+    if (data.user) {
+      this.currentUser = {
+        uid: data.user.id,
+        email: data.user.email || null,
+      };
       this.notifyUserListeners(this.currentUser);
-      this.notifyStatusListeners('offline');
+      this.notifyStatusListeners('synced');
+      this.updateSyncTime();
       return { user: this.currentUser };
     }
-    throw new Error('Invalid credentials');
+
+    throw new Error('Sign in failed');
   }
 
   async signOut() {
+    if (this.client) {
+      await this.client.auth.signOut();
+    }
     this.currentUser = null;
-    localStorage.removeItem(AUTH_KEY);
     this.notifyUserListeners(null);
     this.notifyStatusListeners('offline');
     this.lastSync = null;
@@ -118,30 +158,127 @@ class StorageService {
   }
 
   async loadGames(): Promise<GameEntry[]> {
-    const saved = localStorage.getItem(LOCAL_KEY);
-    let localGames: GameEntry[] = [];
-    if (saved) {
-      try {
-        localGames = JSON.parse(saved);
-      } catch (e) {
-        console.error("Failed to parse local games", e);
+    if (!this.client || !this.currentUser) {
+      // Fallback to localStorage if not connected
+      const saved = localStorage.getItem(LOCAL_KEY);
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error("Failed to parse local games", e);
+        }
       }
+      return [];
     }
-    this.notifyStatusListeners('offline');
-    return localGames;
+
+    try {
+      this.notifyStatusListeners('syncing');
+
+      const { data, error } = await this.client
+        .from('games')
+        .select('*')
+        .eq('user_id', this.currentUser.uid)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const games: GameEntry[] = data.map((row: any) => ({
+        ...row.payload,
+        id: row.id,
+      }));
+
+      // Also save to localStorage as backup
+      localStorage.setItem(LOCAL_KEY, JSON.stringify(games));
+
+      this.notifyStatusListeners('synced');
+      this.updateSyncTime();
+      return games;
+    } catch (error) {
+      console.error('Error loading games from Supabase:', error);
+      this.notifyStatusListeners('error');
+
+      // Fallback to localStorage
+      const saved = localStorage.getItem(LOCAL_KEY);
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error("Failed to parse local games", e);
+        }
+      }
+      return [];
+    }
   }
 
   async saveGames(games: GameEntry[]): Promise<void> {
+    // Always save to localStorage first
     localStorage.setItem(LOCAL_KEY, JSON.stringify(games));
-    this.notifyStatusListeners('offline');
+
+    if (!this.client || !this.currentUser) {
+      this.notifyStatusListeners('offline');
+      return;
+    }
+
+    try {
+      this.notifyStatusListeners('syncing');
+
+      // Delete all existing games for this user
+      await this.client
+        .from('games')
+        .delete()
+        .eq('user_id', this.currentUser.uid);
+
+      // Insert all games
+      const rows = games.map(game => ({
+        id: game.id,
+        user_id: this.currentUser!.uid,
+        payload: game,
+      }));
+
+      const { error } = await this.client
+        .from('games')
+        .insert(rows);
+
+      if (error) throw error;
+
+      this.notifyStatusListeners('synced');
+      this.updateSyncTime();
+    } catch (error) {
+      console.error('Error saving games to Supabase:', error);
+      this.notifyStatusListeners('error');
+    }
   }
 
   async deleteGame(id: string): Promise<void> {
+    // Delete from localStorage
     const saved = localStorage.getItem(LOCAL_KEY);
     if (saved) {
       const games = JSON.parse(saved) as GameEntry[];
       const filtered = games.filter(g => g.id !== id);
       localStorage.setItem(LOCAL_KEY, JSON.stringify(filtered));
+    }
+
+    if (!this.client || !this.currentUser) {
+      this.notifyStatusListeners('offline');
+      return;
+    }
+
+    try {
+      this.notifyStatusListeners('syncing');
+
+      const { error } = await this.client
+        .from('games')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', this.currentUser.uid);
+
+      if (error) throw error;
+
+      this.notifyStatusListeners('synced');
+      this.updateSyncTime();
+    } catch (error) {
+      console.error('Error deleting game from Supabase:', error);
+      this.notifyStatusListeners('error');
     }
   }
 }
