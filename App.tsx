@@ -215,7 +215,7 @@ const App: React.FC = () => {
           <div className="flex gap-2">
             <button
               onClick={() => setActiveTeam('Partizan')}
-              className={`px-8 py-5 text-xl font-black oswald uppercase tracking-tight transition-all relative flex items-center gap-3 ${
+              className={`px-8 py-5 text-2xl font-black oswald uppercase tracking-tight transition-all relative flex items-center gap-3 ${
                 activeTeam === 'Partizan'
                   ? 'text-white bg-slate-900/50'
                   : 'text-slate-600 hover:text-slate-400 hover:bg-slate-900/20'
@@ -223,8 +223,8 @@ const App: React.FC = () => {
             >
               <span className="text-2xl">⚫</span>
               <span>PARTIZAN</span>
-              <span className={`text-xs px-2.5 py-1 rounded-full font-bold ${activeTeam === 'Partizan' ? 'bg-orange-600 text-white' : 'bg-slate-800 text-slate-500'}`}>
-                {games.filter(g => g.team === 'Partizan').length}
+              <span className={`text-sm px-2.5 py-1 rounded-full font-bold ${activeTeam === 'Partizan' ? 'bg-orange-600 text-white' : 'bg-slate-800 text-slate-500'}`}>
+                {games.filter((g: GameEntry) => g.team === 'Partizan').length}
               </span>
               {activeTeam === 'Partizan' && (
                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-orange-600" />
@@ -232,7 +232,7 @@ const App: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTeam('Reprezentacija')}
-              className={`px-8 py-5 text-xl font-black oswald uppercase tracking-tight transition-all relative flex items-center gap-3 ${
+              className={`px-8 py-5 text-2xl font-black oswald uppercase tracking-tight transition-all relative flex items-center gap-3 ${
                 activeTeam === 'Reprezentacija'
                   ? 'text-white bg-slate-900/50'
                   : 'text-slate-600 hover:text-slate-400 hover:bg-slate-900/20'
@@ -240,11 +240,11 @@ const App: React.FC = () => {
             >
               <span className="text-2xl">🇷🇸</span>
               <span>REPREZENTACIJA</span>
-              <span className={`text-xs px-2.5 py-1 rounded-full font-bold ${activeTeam === 'Reprezentacija' ? 'bg-orange-600 text-white' : 'bg-slate-800 text-slate-500'}`}>
-                {games.filter(g => g.team === 'Reprezentacija').length}
+              <span className={`text-sm px-2.5 py-1 rounded-full font-bold ${activeTeam === 'Reprezentacija' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-500'}`}>
+                {games.filter((g: GameEntry) => g.team === 'Reprezentacija').length}
               </span>
               {activeTeam === 'Reprezentacija' && (
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-orange-600" />
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600" />
               )}
             </button>
           </div>
@@ -253,7 +253,7 @@ const App: React.FC = () => {
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-10">
         <div className={view === 'add' ? 'max-w-4xl mx-auto' : ''}>
-          {view === 'list' && <GameList games={games.filter(g => g.team === activeTeam)} onEdit={handleEdit} onDelete={handleDelete} />}
+          {view === 'list' && <GameList games={games.filter(g => g.team === activeTeam)} onEdit={handleEdit} onDelete={handleDelete} activeTeam={activeTeam} />}
           {view === 'stats' && <StatsDashboard games={games.filter(g => g.team === activeTeam)} />}
           {view === 'add' && (
             <GameForm
@@ -269,9 +269,9 @@ const App: React.FC = () => {
       {showSyncSettings && <SyncSettings onClose={() => setShowSyncSettings(false)} />}
 
       {view !== 'add' && (
-        <button 
+        <button
           onClick={() => setView('add')}
-          className="fixed bottom-28 right-8 w-16 h-16 bg-orange-600 rounded-3xl flex items-center justify-center shadow-[0_20px_40px_rgba(234,88,12,0.3)] z-40 active:scale-90 transition-all hover:bg-orange-500 hover:-translate-y-1"
+          className={`fixed bottom-28 right-8 w-16 h-16 ${activeTeam === 'Partizan' ? 'bg-orange-600 hover:bg-orange-500 shadow-[0_20px_40px_rgba(234,88,12,0.3)]' : 'bg-blue-600 hover:bg-blue-500 shadow-[0_20px_40px_rgba(37,99,235,0.3)]'} rounded-3xl flex items-center justify-center z-40 active:scale-90 transition-all hover:-translate-y-1`}
         >
           <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" /></svg>
         </button>
@@ -279,17 +279,17 @@ const App: React.FC = () => {
 
       <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-sm">
         <div className="bg-slate-900/80 backdrop-blur-2xl border border-slate-800/50 rounded-[32px] shadow-2xl px-10 py-5 flex justify-between items-center">
-          <button onClick={() => setView('list')} className={`flex flex-col items-center gap-2 transition-all ${view === 'list' ? 'text-orange-500 scale-110' : 'text-slate-500 hover:text-slate-300'}`}>
+          <button onClick={() => setView('list')} className={`flex flex-col items-center gap-2 transition-all ${view === 'list' ? (activeTeam === 'Partizan' ? 'text-orange-500' : 'text-blue-500') + ' scale-110' : 'text-slate-500 hover:text-slate-300'}`}>
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-            <span className="text-[9px] font-black uppercase tracking-widest">History</span>
+            <span className="text-xs font-black uppercase tracking-widest">History</span>
           </button>
-          <button onClick={() => setView('stats')} className={`flex flex-col items-center gap-2 transition-all ${view === 'stats' ? 'text-orange-500 scale-110' : 'text-slate-500 hover:text-slate-300'}`}>
+          <button onClick={() => setView('stats')} className={`flex flex-col items-center gap-2 transition-all ${view === 'stats' ? (activeTeam === 'Partizan' ? 'text-orange-500' : 'text-blue-500') + ' scale-110' : 'text-slate-500 hover:text-slate-300'}`}>
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-            <span className="text-[9px] font-black uppercase tracking-widest">Insights</span>
+            <span className="text-xs font-black uppercase tracking-widest">Insights</span>
           </button>
-          <button onClick={() => setShowSyncSettings(true)} className={`flex flex-col items-center gap-2 transition-all ${showSyncSettings ? 'text-orange-500 scale-110' : 'text-slate-500 hover:text-slate-300'}`}>
+          <button onClick={() => setShowSyncSettings(true)} className={`flex flex-col items-center gap-2 transition-all ${showSyncSettings ? (activeTeam === 'Partizan' ? 'text-orange-500' : 'text-blue-500') + ' scale-110' : 'text-slate-500 hover:text-slate-300'}`}>
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-            <span className="text-[9px] font-black uppercase tracking-widest">Storage</span>
+            <span className="text-xs font-black uppercase tracking-widest">Storage</span>
           </button>
         </div>
       </nav>
