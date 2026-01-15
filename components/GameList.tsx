@@ -10,25 +10,61 @@ interface GameListProps {
 }
 
 export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, activeTeam = 'Partizan' }) => {
-  // Team-based color theming
+  // Team-based FULL page theming
+  // Partizan Belgrade: Black & White classic colors
+  // Serbia National Team: Blue & White national colors
   const teamColors = {
     Partizan: {
-      primary: 'orange',
-      accent: 'bg-orange-600',
-      accentHover: 'hover:bg-orange-500',
-      accentText: 'text-orange-500',
-      accentBg: 'bg-orange-600/10',
-      accentBorder: 'border-orange-500/30',
-      shadowColor: 'shadow-orange-600/20',
+      // Core colors - pure black and white
+      pageBg: 'bg-black',
+      cardBg: 'bg-zinc-900',
+      cardBorder: 'border-zinc-800',
+      cardHoverBorder: 'hover:border-white/40',
+      statsBg: 'bg-black/50',
+      // Accent - white with subtle styling
+      accent: 'bg-white',
+      accentText: 'text-white',
+      accentBg: 'bg-white/10',
+      accentBorder: 'border-white/30',
+      // Text colors
+      primaryText: 'text-white',
+      secondaryText: 'text-zinc-400',
+      mutedText: 'text-zinc-600',
+      // Interactive elements
+      buttonBg: 'bg-white',
+      buttonText: 'text-black',
+      inputBorder: 'border-zinc-700',
+      inputFocus: 'focus:ring-white/30 focus:border-white/50',
+      // Shadows and highlights
+      shadowColor: 'shadow-white/10',
+      tabActive: 'border-white',
+      tabBadgeActive: 'bg-white/20 text-white',
     },
     Reprezentacija: {
-      primary: 'blue',
-      accent: 'bg-blue-600',
-      accentHover: 'hover:bg-blue-500',
-      accentText: 'text-blue-500',
-      accentBg: 'bg-blue-600/10',
-      accentBorder: 'border-blue-500/30',
-      shadowColor: 'shadow-blue-600/20',
+      // Core colors - Serbian blue and white
+      pageBg: 'bg-blue-950',
+      cardBg: 'bg-blue-900/80',
+      cardBorder: 'border-blue-800',
+      cardHoverBorder: 'hover:border-blue-400/40',
+      statsBg: 'bg-blue-950/50',
+      // Accent - bright blue
+      accent: 'bg-blue-500',
+      accentText: 'text-blue-400',
+      accentBg: 'bg-blue-500/10',
+      accentBorder: 'border-blue-400/30',
+      // Text colors
+      primaryText: 'text-white',
+      secondaryText: 'text-blue-200',
+      mutedText: 'text-blue-400/60',
+      // Interactive elements
+      buttonBg: 'bg-blue-500',
+      buttonText: 'text-white',
+      inputBorder: 'border-blue-700',
+      inputFocus: 'focus:ring-blue-400/30 focus:border-blue-400/50',
+      // Shadows and highlights
+      shadowColor: 'shadow-blue-500/20',
+      tabActive: 'border-blue-400',
+      tabBadgeActive: 'bg-blue-500/30 text-blue-200',
     }
   };
   const colors = teamColors[activeTeam];
@@ -144,7 +180,7 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
     <div className="space-y-12">
       {/* Quick Stats Summary */}
       {seasonStats && (
-        <div className="bg-gradient-to-br from-slate-900/50 to-slate-900/30 border-2 border-slate-800/50 rounded-2xl p-4 md:p-6">
+        <div className={`${colors.cardBg} border-2 ${colors.cardBorder} rounded-2xl p-4 md:p-6`}>
           <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 md:gap-4">
             {/* PPG */}
             <div className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 ${colors.accentBg} ${colors.accentBorder}`}>
@@ -152,14 +188,14 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
               <span className={`font-black oswald text-3xl ${colors.accentText}`}>{seasonStats.ppg}</span>
             </div>
             {/* RPG */}
-            <div className="flex flex-col items-center justify-center p-3 bg-slate-950/50 rounded-xl border border-slate-800">
-              <span className="text-slate-600 font-black uppercase text-[10px] tracking-[0.2em] mb-1.5">RPG</span>
-              <span className="font-black oswald text-3xl text-white">{seasonStats.rpg}</span>
+            <div className={`flex flex-col items-center justify-center p-3 ${colors.statsBg} rounded-xl border ${colors.cardBorder}`}>
+              <span className={`${colors.mutedText} font-black uppercase text-[10px] tracking-[0.2em] mb-1.5`}>RPG</span>
+              <span className={`font-black oswald text-3xl ${colors.primaryText}`}>{seasonStats.rpg}</span>
             </div>
             {/* APG */}
-            <div className="flex flex-col items-center justify-center p-3 bg-slate-950/50 rounded-xl border border-slate-800">
-              <span className="text-slate-600 font-black uppercase text-[10px] tracking-[0.2em] mb-1.5">APG</span>
-              <span className="font-black oswald text-3xl text-white">{seasonStats.apg}</span>
+            <div className={`flex flex-col items-center justify-center p-3 ${colors.statsBg} rounded-xl border ${colors.cardBorder}`}>
+              <span className={`${colors.mutedText} font-black uppercase text-[10px] tracking-[0.2em] mb-1.5`}>APG</span>
+              <span className={`font-black oswald text-3xl ${colors.primaryText}`}>{seasonStats.apg}</span>
             </div>
             {/* PIR */}
             <div className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 ${colors.accentBg} ${colors.accentBorder}`}>
@@ -167,26 +203,26 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
               <span className={`font-black oswald text-3xl ${colors.accentText}`}>{seasonStats.pir}</span>
             </div>
             {/* 2PT % */}
-            <div className="flex flex-col items-center justify-center p-3 bg-slate-950/50 rounded-xl border border-slate-800">
-              <span className="text-slate-600 font-black uppercase text-[10px] tracking-[0.2em] mb-1.5">2PT%</span>
-              <span className="font-black oswald text-3xl text-white">{seasonStats.fg2Percentage}%</span>
+            <div className={`flex flex-col items-center justify-center p-3 ${colors.statsBg} rounded-xl border ${colors.cardBorder}`}>
+              <span className={`${colors.mutedText} font-black uppercase text-[10px] tracking-[0.2em] mb-1.5`}>2PT%</span>
+              <span className={`font-black oswald text-3xl ${colors.primaryText}`}>{seasonStats.fg2Percentage}%</span>
             </div>
             {/* 3PT % */}
-            <div className="flex flex-col items-center justify-center p-3 bg-slate-950/50 rounded-xl border border-slate-800">
-              <span className="text-slate-600 font-black uppercase text-[10px] tracking-[0.2em] mb-1.5">3PT%</span>
-              <span className="font-black oswald text-3xl text-white">{seasonStats.fg3Percentage}%</span>
+            <div className={`flex flex-col items-center justify-center p-3 ${colors.statsBg} rounded-xl border ${colors.cardBorder}`}>
+              <span className={`${colors.mutedText} font-black uppercase text-[10px] tracking-[0.2em] mb-1.5`}>3PT%</span>
+              <span className={`font-black oswald text-3xl ${colors.primaryText}`}>{seasonStats.fg3Percentage}%</span>
             </div>
             {/* FT % */}
-            <div className="flex flex-col items-center justify-center p-3 bg-slate-950/50 rounded-xl border border-slate-800">
-              <span className="text-slate-600 font-black uppercase text-[10px] tracking-[0.2em] mb-1.5">FT%</span>
-              <span className="font-black oswald text-3xl text-white">{seasonStats.ftPercentage}%</span>
+            <div className={`flex flex-col items-center justify-center p-3 ${colors.statsBg} rounded-xl border ${colors.cardBorder}`}>
+              <span className={`${colors.mutedText} font-black uppercase text-[10px] tracking-[0.2em] mb-1.5`}>FT%</span>
+              <span className={`font-black oswald text-3xl ${colors.primaryText}`}>{seasonStats.ftPercentage}%</span>
             </div>
             {/* Average Minutes - highlighted similar to PIR */}
-            <div className="flex flex-col items-center justify-center p-3 bg-cyan-600/10 rounded-xl border-2 border-cyan-500/30 col-span-3 md:col-span-4 lg:col-span-1">
-              <span className="text-cyan-500 font-black uppercase text-[10px] tracking-[0.2em] mb-1.5">MPG</span>
+            <div className={`flex flex-col items-center justify-center p-3 ${colors.accentBg} rounded-xl border-2 ${colors.accentBorder} col-span-3 md:col-span-4 lg:col-span-1`}>
+              <span className={`${colors.accentText} font-black uppercase text-[10px] tracking-[0.2em] mb-1.5`}>MPG</span>
               <div className="flex flex-col items-center">
-                <span className="font-black oswald text-3xl text-cyan-400">{seasonStats.mpg}</span>
-                <span className="text-xs text-slate-600 font-bold mt-1">{seasonStats.gamesPlayed} GP</span>
+                <span className={`font-black oswald text-3xl ${colors.accentText}`}>{seasonStats.mpg}</span>
+                <span className={`text-xs ${colors.mutedText} font-bold mt-1`}>{seasonStats.gamesPlayed} GP</span>
               </div>
             </div>
           </div>
@@ -195,19 +231,19 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
 
       <div className="space-y-6">
         {/* Season Tabs */}
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide border-b-2 border-slate-900">
+        <div className={`flex gap-2 overflow-x-auto pb-2 scrollbar-hide border-b-2 ${colors.cardBorder}`}>
           {seasons.map(s => (
             <button
               key={s}
               onClick={() => { setActiveSeason(s); setFilterComp('All'); }}
               className={`px-6 py-3 rounded-t-xl text-base font-black whitespace-nowrap transition-all uppercase tracking-[0.2em] flex items-center gap-2 ${
                 activeSeason === s
-                  ? `bg-slate-900 text-white border-b-4 ${activeTeam === 'Partizan' ? 'border-orange-600' : 'border-blue-600'}`
-                  : 'text-slate-600 hover:text-slate-400 hover:bg-slate-900/30'
+                  ? `${colors.cardBg} ${colors.primaryText} border-b-4 ${colors.tabActive}`
+                  : `${colors.mutedText} hover:${colors.secondaryText} hover:${colors.cardBg}`
               }`}
             >
               <span>{s === 'All seasons' ? '🏀 ALL SEASONS' : `SEASON ${s}`}</span>
-              <span className={`text-sm px-2 py-0.5 rounded-full ${activeSeason === s ? (activeTeam === 'Partizan' ? 'bg-orange-600/30 text-orange-300' : 'bg-blue-600/30 text-blue-300') : 'bg-slate-800 text-slate-500'}`}>
+              <span className={`text-sm px-2 py-0.5 rounded-full ${activeSeason === s ? colors.tabBadgeActive : `${colors.cardBg} ${colors.mutedText}`}`}>
                 {getSeasonCount(s)}
               </span>
             </button>
@@ -221,15 +257,15 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
             placeholder="Search by opponent or date..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className={`w-full bg-slate-900/50 border-slate-800 border-2 rounded-2xl pl-12 pr-4 py-4 text-base focus:ring-2 ${activeTeam === 'Partizan' ? 'focus:ring-orange-500/30 focus:border-orange-500/50' : 'focus:ring-blue-500/30 focus:border-blue-500/50'} outline-none transition-all placeholder-slate-600`}
+            className={`w-full ${colors.cardBg} ${colors.inputBorder} border-2 rounded-2xl pl-12 pr-4 py-4 text-base ${colors.primaryText} focus:ring-2 ${colors.inputFocus} outline-none transition-all placeholder:${colors.mutedText}`}
           />
-          <svg className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className={`w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 ${colors.mutedText}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-600 hover:text-white transition-all"
+              className={`absolute right-4 top-1/2 -translate-y-1/2 ${colors.mutedText} hover:${colors.primaryText} transition-all`}
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -240,20 +276,20 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
 
         <div className="flex flex-col md:flex-row md:items-end justify-between pb-4 gap-6">
           <div className="flex items-center gap-3">
-            <h2 className="text-4xl font-black oswald text-white tracking-tight">
+            <h2 className={`text-4xl font-black oswald ${colors.primaryText} tracking-tight`}>
               {activeSeason === 'All seasons' ? 'ALL GAMES' : `SEASON ${activeSeason}`}
             </h2>
-            <span className="text-slate-600 text-base font-black">
+            <span className={`${colors.mutedText} text-base font-black`}>
               ({filteredGamesForSeason.length} {filteredGamesForSeason.length === 1 ? 'game' : 'games'})
             </span>
           </div>
 
           <div className="flex items-center gap-4 flex-wrap">
               {/* View Mode Toggle */}
-              <div className="flex items-center gap-2 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
+              <div className={`flex items-center gap-2 ${colors.cardBg} p-1.5 rounded-xl border ${colors.cardBorder}`}>
                 <button
                   onClick={() => setViewMode('gallery')}
-                  className={`p-2 rounded-lg transition-all ${viewMode === 'gallery' ? `${colors.accent} text-white` : 'text-slate-500 hover:text-white'}`}
+                  className={`p-2 rounded-lg transition-all ${viewMode === 'gallery' ? `${colors.accent} ${colors.buttonText}` : `${colors.mutedText} hover:${colors.primaryText}`}`}
                   title="Gallery View"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -262,7 +298,7 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? `${colors.accent} text-white` : 'text-slate-500 hover:text-white'}`}
+                  className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? `${colors.accent} ${colors.buttonText}` : `${colors.mutedText} hover:${colors.primaryText}`}`}
                   title="List View"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -273,23 +309,23 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
 
               <button
                   onClick={() => setShowBest(!showBest)}
-                  className={`text-xs font-black transition-all px-6 py-2.5 rounded-full border-2 ${showBest ? `${colors.accentBg} ${colors.accentBorder.replace('/30', '')} ${colors.accentText} shadow-lg ${colors.shadowColor}` : 'border-slate-800 text-slate-500 hover:border-slate-600'}`}
+                  className={`text-xs font-black transition-all px-6 py-2.5 rounded-full border-2 ${showBest ? `${colors.accentBg} ${colors.accentBorder} ${colors.accentText} shadow-lg ${colors.shadowColor}` : `${colors.cardBorder} ${colors.mutedText} hover:${colors.secondaryText}`}`}
               >
                   TOP 10 BEST
               </button>
-              <div className="flex items-center gap-3 bg-slate-900 px-4 py-2 rounded-xl border border-slate-800">
-                  <span className="text-slate-600 font-black text-xs tracking-widest">SORT:</span>
+              <div className={`flex items-center gap-3 ${colors.cardBg} px-4 py-2 rounded-xl border ${colors.cardBorder}`}>
+                  <span className={`${colors.mutedText} font-black text-xs tracking-widest`}>SORT:</span>
                   <select
-                      className="bg-transparent border-none focus:ring-0 font-black text-xs uppercase text-slate-300 p-0 cursor-pointer hover:text-white"
+                      className={`bg-transparent border-none focus:ring-0 font-black text-xs uppercase ${colors.secondaryText} p-0 cursor-pointer hover:${colors.primaryText}`}
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value as SortField)}
                   >
-                      <option value="date" className="bg-slate-900">Date</option>
-                      <option value="points" className="bg-slate-900">Points</option>
-                      <option value="indexRating" className="bg-slate-900">Index</option>
-                      <option value="rebounds" className="bg-slate-900">Rebounds</option>
-                      <option value="assists" className="bg-slate-900">Assists</option>
-                      <option value="minutes" className="bg-slate-900">Minutes</option>
+                      <option value="date" className={colors.cardBg}>Date</option>
+                      <option value="points" className={colors.cardBg}>Points</option>
+                      <option value="indexRating" className={colors.cardBg}>Index</option>
+                      <option value="rebounds" className={colors.cardBg}>Rebounds</option>
+                      <option value="assists" className={colors.cardBg}>Assists</option>
+                      <option value="minutes" className={colors.cardBg}>Minutes</option>
                   </select>
               </div>
           </div>
@@ -301,11 +337,11 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
               key={c}
               onClick={() => setFilterComp(c)}
               className={`px-6 py-2.5 rounded-2xl text-xs font-black whitespace-nowrap border-2 transition-all uppercase tracking-[0.2em] flex items-center gap-2 ${
-              filterComp === c ? `${colors.accent} ${activeTeam === 'Partizan' ? 'border-orange-600' : 'border-blue-600'} text-white shadow-xl ${colors.shadowColor}` : 'bg-slate-900 border-slate-800 text-slate-500 hover:border-slate-700'
+              filterComp === c ? `${colors.accent} ${colors.accentBorder} ${colors.buttonText} shadow-xl ${colors.shadowColor}` : `${colors.cardBg} ${colors.cardBorder} ${colors.mutedText} hover:${colors.secondaryText}`
               }`}
           >
               <span>{c}</span>
-              <span className={`text-sm px-2 py-0.5 rounded-full ${filterComp === c ? 'bg-white/20' : 'bg-slate-800'}`}>
+              <span className={`text-sm px-2 py-0.5 rounded-full ${filterComp === c ? 'bg-black/20' : colors.statsBg}`}>
                 {getCompetitionCount(c)}
               </span>
           </button>
@@ -319,27 +355,27 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
           {displayGames.map((game) => (
             <div
               key={game.id}
-              className={`bg-slate-900 rounded-3xl overflow-hidden border-2 border-slate-800 shadow-2xl group ${activeTeam === 'Partizan' ? 'hover:border-orange-500/40' : 'hover:border-blue-500/40'} transition-all duration-500 ${game.isDnp ? 'opacity-60' : ''}`}
+              className={`${colors.cardBg} rounded-3xl overflow-hidden border-2 ${colors.cardBorder} shadow-2xl group ${colors.cardHoverBorder} transition-all duration-500 ${game.isDnp ? 'opacity-60' : ''}`}
             >
               <div className="p-8">
                 <div className="flex justify-between items-start mb-6">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-black bg-slate-800 text-slate-400 px-4 py-2 rounded-xl uppercase tracking-widest group-hover:bg-slate-700 transition-all">{game.competition}</span>
-                    <span className="text-sm text-slate-600 font-black uppercase tracking-tighter">{game.date}</span>
+                    <span className={`text-xs font-black ${colors.statsBg} ${colors.secondaryText} px-4 py-2 rounded-xl uppercase tracking-widest group-hover:opacity-80 transition-all`}>{game.competition}</span>
+                    <span className={`text-sm ${colors.mutedText} font-black uppercase tracking-tighter`}>{game.date}</span>
                     {game.isOvertime && <span className="text-xs font-black bg-amber-900/40 text-amber-400 px-3 py-1.5 rounded-xl uppercase tracking-widest">OT</span>}
                   </div>
                   {game.isDnp && <span className="text-xs font-black bg-red-900/40 text-red-400 px-4 py-2 rounded-xl uppercase tracking-widest">DNP</span>}
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-black text-4xl text-white truncate oswald tracking-tight group-hover:text-orange-50 transition-colors">
+                  <h4 className={`font-black text-4xl ${colors.primaryText} truncate oswald tracking-tight transition-colors`}>
                     {game.isHome ? 'vs ' : '@ '}{game.opponent}
                   </h4>
                   <div className="flex items-center gap-4 mt-3">
                     <span className={`text-3xl font-black oswald ${game.result === 'W' ? 'text-emerald-500' : 'text-red-500'}`}>
                       {game.result} {game.finalScore}
                     </span>
-                    <span className="text-slate-600 text-sm font-black tracking-widest">({game.seasonRecord})</span>
+                    <span className={`${colors.mutedText} text-sm font-black tracking-widest`}>({game.seasonRecord})</span>
                   </div>
                 </div>
 
@@ -350,33 +386,33 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
                 )}
 
                 {game.isDnp && (
-                  <div className="mt-6 p-5 bg-slate-950 rounded-2xl border border-slate-800">
-                    <p className="text-sm font-black text-slate-500 uppercase tracking-widest mb-2">DNP REASON</p>
-                    <p className="text-base font-bold text-slate-400 italic">"{game.dnpReason || 'No details provided'}"</p>
+                  <div className={`mt-6 p-5 ${colors.statsBg} rounded-2xl border ${colors.cardBorder}`}>
+                    <p className={`text-sm font-black ${colors.mutedText} uppercase tracking-widest mb-2`}>DNP REASON</p>
+                    <p className={`text-base font-bold ${colors.secondaryText} italic`}>"{game.dnpReason || 'No details provided'}"</p>
                   </div>
                 )}
               </div>
 
-              <div className="bg-slate-950/50 px-8 py-6 border-t-2 border-slate-800 group-hover:bg-slate-950/80 transition-all">
+              <div className={`${colors.statsBg} px-8 py-6 border-t-2 ${colors.cardBorder} transition-all`}>
                 {!game.isDnp ? (
                   <>
                     <div className="grid grid-cols-3 md:grid-cols-5 gap-3 md:gap-4">
-                      {/* Minutes - highlighted with cyan like MPG */}
-                      <div className="flex flex-col items-center justify-center p-3 bg-cyan-600/10 rounded-xl border-2 border-cyan-500/30">
-                        <span className="text-cyan-500 font-black uppercase text-[10px] tracking-[0.2em] mb-1.5">MIN</span>
-                        <span className="font-black oswald text-2xl md:text-3xl text-cyan-400">{game.stats.minutes}</span>
+                      {/* Minutes - highlighted */}
+                      <div className={`flex flex-col items-center justify-center p-3 ${colors.accentBg} rounded-xl border-2 ${colors.accentBorder}`}>
+                        <span className={`${colors.accentText} font-black uppercase text-[10px] tracking-[0.2em] mb-1.5`}>MIN</span>
+                        <span className={`font-black oswald text-2xl md:text-3xl ${colors.accentText}`}>{game.stats.minutes}</span>
                       </div>
-                      <div className="flex flex-col items-center justify-center p-3 bg-slate-900/50 rounded-xl border border-slate-800">
-                        <span className="text-slate-600 font-black uppercase text-[10px] tracking-[0.2em] mb-1.5">PTS</span>
-                        <span className="font-black oswald text-2xl md:text-3xl text-white">{game.stats.points}</span>
+                      <div className={`flex flex-col items-center justify-center p-3 ${colors.cardBg} rounded-xl border ${colors.cardBorder}`}>
+                        <span className={`${colors.mutedText} font-black uppercase text-[10px] tracking-[0.2em] mb-1.5`}>PTS</span>
+                        <span className={`font-black oswald text-2xl md:text-3xl ${colors.primaryText}`}>{game.stats.points}</span>
                       </div>
-                      <div className="flex flex-col items-center justify-center p-3 bg-slate-900/50 rounded-xl border border-slate-800">
-                        <span className="text-slate-600 font-black uppercase text-[10px] tracking-[0.2em] mb-1.5">REB</span>
-                        <span className="font-black oswald text-2xl md:text-3xl text-white">{game.stats.rebounds}</span>
+                      <div className={`flex flex-col items-center justify-center p-3 ${colors.cardBg} rounded-xl border ${colors.cardBorder}`}>
+                        <span className={`${colors.mutedText} font-black uppercase text-[10px] tracking-[0.2em] mb-1.5`}>REB</span>
+                        <span className={`font-black oswald text-2xl md:text-3xl ${colors.primaryText}`}>{game.stats.rebounds}</span>
                       </div>
-                      <div className="flex flex-col items-center justify-center p-3 bg-slate-900/50 rounded-xl border border-slate-800">
-                        <span className="text-slate-600 font-black uppercase text-[10px] tracking-[0.2em] mb-1.5">AST</span>
-                        <span className="font-black oswald text-2xl md:text-3xl text-white">{game.stats.assists}</span>
+                      <div className={`flex flex-col items-center justify-center p-3 ${colors.cardBg} rounded-xl border ${colors.cardBorder}`}>
+                        <span className={`${colors.mutedText} font-black uppercase text-[10px] tracking-[0.2em] mb-1.5`}>AST</span>
+                        <span className={`font-black oswald text-2xl md:text-3xl ${colors.primaryText}`}>{game.stats.assists}</span>
                       </div>
                       <div className={`flex flex-col items-center justify-center p-3 ${colors.accentBg} rounded-xl border-2 ${colors.accentBorder} col-span-2 md:col-span-1`}>
                         <span className={`${colors.accentText} font-black uppercase text-[10px] tracking-[0.2em] mb-1.5`}>PIR</span>
@@ -387,7 +423,7 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
                     {/* Expand Stats Button */}
                     <button
                       onClick={() => toggleExpanded(game.id)}
-                      className={`w-full mt-4 py-3 flex items-center justify-center gap-2 text-slate-500 ${activeTeam === 'Partizan' ? 'hover:text-orange-500' : 'hover:text-blue-500'} transition-all rounded-xl hover:bg-slate-900/50`}
+                      className={`w-full mt-4 py-3 flex items-center justify-center gap-2 ${colors.mutedText} hover:${colors.accentText} transition-all rounded-xl hover:${colors.cardBg}`}
                     >
                       <span className="text-xs font-black uppercase tracking-widest">
                         {expandedGameId === game.id ? 'Hide Details' : 'Show Full Stats'}
@@ -408,29 +444,29 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
                         expandedGameId === game.id ? 'max-h-[500px] opacity-100 mt-4' : 'max-h-0 opacity-0'
                       }`}
                     >
-                      <div className="bg-slate-900/80 rounded-2xl p-5 border border-slate-800 space-y-5">
+                      <div className={`${colors.cardBg} rounded-2xl p-5 border ${colors.cardBorder} space-y-5`}>
                         {/* Shooting Stats */}
                         <div>
-                          <h5 className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-3">Shooting</h5>
+                          <h5 className={`text-xs font-black ${colors.accentText} uppercase tracking-widest mb-3`}>Shooting</h5>
                           <div className="grid grid-cols-3 gap-3">
-                            <div className="bg-slate-950/50 rounded-xl p-3 text-center border border-slate-800">
-                              <span className="text-slate-500 font-black uppercase text-[10px] tracking-wider block mb-1">2PT</span>
-                              <span className="font-black oswald text-xl text-white">{game.stats.twoPtMade}/{game.stats.twoPtAtt}</span>
-                              <span className="text-slate-600 text-xs font-bold block mt-0.5">
+                            <div className={`${colors.statsBg} rounded-xl p-3 text-center border ${colors.cardBorder}`}>
+                              <span className={`${colors.mutedText} font-black uppercase text-[10px] tracking-wider block mb-1`}>2PT</span>
+                              <span className={`font-black oswald text-xl ${colors.primaryText}`}>{game.stats.twoPtMade}/{game.stats.twoPtAtt}</span>
+                              <span className={`${colors.mutedText} text-xs font-bold block mt-0.5`}>
                                 {game.stats.twoPtAtt > 0 ? ((game.stats.twoPtMade / game.stats.twoPtAtt) * 100).toFixed(0) : 0}%
                               </span>
                             </div>
-                            <div className="bg-slate-950/50 rounded-xl p-3 text-center border border-slate-800">
-                              <span className="text-slate-500 font-black uppercase text-[10px] tracking-wider block mb-1">3PT</span>
-                              <span className="font-black oswald text-xl text-white">{game.stats.threePtMade}/{game.stats.threePtAtt}</span>
-                              <span className="text-slate-600 text-xs font-bold block mt-0.5">
+                            <div className={`${colors.statsBg} rounded-xl p-3 text-center border ${colors.cardBorder}`}>
+                              <span className={`${colors.mutedText} font-black uppercase text-[10px] tracking-wider block mb-1`}>3PT</span>
+                              <span className={`font-black oswald text-xl ${colors.primaryText}`}>{game.stats.threePtMade}/{game.stats.threePtAtt}</span>
+                              <span className={`${colors.mutedText} text-xs font-bold block mt-0.5`}>
                                 {game.stats.threePtAtt > 0 ? ((game.stats.threePtMade / game.stats.threePtAtt) * 100).toFixed(0) : 0}%
                               </span>
                             </div>
-                            <div className="bg-slate-950/50 rounded-xl p-3 text-center border border-slate-800">
-                              <span className="text-slate-500 font-black uppercase text-[10px] tracking-wider block mb-1">FT</span>
-                              <span className="font-black oswald text-xl text-white">{game.stats.ftMade}/{game.stats.ftAtt}</span>
-                              <span className="text-slate-600 text-xs font-bold block mt-0.5">
+                            <div className={`${colors.statsBg} rounded-xl p-3 text-center border ${colors.cardBorder}`}>
+                              <span className={`${colors.mutedText} font-black uppercase text-[10px] tracking-wider block mb-1`}>FT</span>
+                              <span className={`font-black oswald text-xl ${colors.primaryText}`}>{game.stats.ftMade}/{game.stats.ftAtt}</span>
+                              <span className={`${colors.mutedText} text-xs font-bold block mt-0.5`}>
                                 {game.stats.ftAtt > 0 ? ((game.stats.ftMade / game.stats.ftAtt) * 100).toFixed(0) : 0}%
                               </span>
                             </div>
@@ -439,49 +475,49 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
 
                         {/* Other Stats */}
                         <div>
-                          <h5 className="text-xs font-black text-emerald-400 uppercase tracking-widest mb-3">Other Stats</h5>
+                          <h5 className={`text-xs font-black ${colors.secondaryText} uppercase tracking-widest mb-3`}>Other Stats</h5>
                           <div className="grid grid-cols-4 gap-2">
-                            <div className="bg-slate-950/50 rounded-lg p-2 text-center border border-slate-800">
-                              <span className="text-slate-500 font-black uppercase text-[9px] tracking-wider block">STL</span>
-                              <span className="font-black oswald text-lg text-white">{game.stats.steals}</span>
+                            <div className={`${colors.statsBg} rounded-lg p-2 text-center border ${colors.cardBorder}`}>
+                              <span className={`${colors.mutedText} font-black uppercase text-[9px] tracking-wider block`}>STL</span>
+                              <span className={`font-black oswald text-lg ${colors.primaryText}`}>{game.stats.steals}</span>
                             </div>
-                            <div className="bg-slate-950/50 rounded-lg p-2 text-center border border-slate-800">
-                              <span className="text-slate-500 font-black uppercase text-[9px] tracking-wider block">BLK</span>
-                              <span className="font-black oswald text-lg text-white">{game.stats.blocks}</span>
+                            <div className={`${colors.statsBg} rounded-lg p-2 text-center border ${colors.cardBorder}`}>
+                              <span className={`${colors.mutedText} font-black uppercase text-[9px] tracking-wider block`}>BLK</span>
+                              <span className={`font-black oswald text-lg ${colors.primaryText}`}>{game.stats.blocks}</span>
                             </div>
-                            <div className="bg-slate-950/50 rounded-lg p-2 text-center border border-slate-800">
-                              <span className="text-slate-500 font-black uppercase text-[9px] tracking-wider block">TO</span>
-                              <span className="font-black oswald text-lg text-white">{game.stats.turnovers}</span>
+                            <div className={`${colors.statsBg} rounded-lg p-2 text-center border ${colors.cardBorder}`}>
+                              <span className={`${colors.mutedText} font-black uppercase text-[9px] tracking-wider block`}>TO</span>
+                              <span className={`font-black oswald text-lg ${colors.primaryText}`}>{game.stats.turnovers}</span>
                             </div>
-                            <div className="bg-slate-950/50 rounded-lg p-2 text-center border border-slate-800">
-                              <span className="text-slate-500 font-black uppercase text-[9px] tracking-wider block">FOULS</span>
-                              <span className="font-black oswald text-lg text-white">{game.stats.fouls}</span>
+                            <div className={`${colors.statsBg} rounded-lg p-2 text-center border ${colors.cardBorder}`}>
+                              <span className={`${colors.mutedText} font-black uppercase text-[9px] tracking-wider block`}>FOULS</span>
+                              <span className={`font-black oswald text-lg ${colors.primaryText}`}>{game.stats.fouls}</span>
                             </div>
                           </div>
                         </div>
 
                         {/* Notes */}
                         {game.notes && (
-                          <div className="bg-slate-950/50 rounded-xl p-4 border border-slate-800">
-                            <h5 className="text-xs font-black text-amber-400 uppercase tracking-widest mb-2">Notes</h5>
-                            <p className="text-base text-slate-400 italic">"{game.notes}"</p>
+                          <div className={`${colors.statsBg} rounded-xl p-4 border ${colors.cardBorder}`}>
+                            <h5 className={`text-xs font-black ${colors.accentText} uppercase tracking-widest mb-2`}>Notes</h5>
+                            <p className={`text-base ${colors.secondaryText} italic`}>"{game.notes}"</p>
                           </div>
                         )}
                       </div>
                     </div>
                   </>
                 ) : (
-                  <div className="flex items-center justify-center text-slate-700 font-black tracking-[0.4em] text-sm uppercase py-4">
+                  <div className={`flex items-center justify-center ${colors.mutedText} font-black tracking-[0.4em] text-sm uppercase py-4`}>
                     NOT ACTIVE
                   </div>
                 )}
                 <div className="flex gap-2 justify-end mt-4">
-                  <button onClick={() => onEdit(game)} className="p-3 text-slate-600 hover:text-white hover:bg-slate-800 rounded-xl transition-all">
+                  <button onClick={() => onEdit(game)} className={`p-3 ${colors.mutedText} hover:${colors.primaryText} hover:${colors.cardBg} rounded-xl transition-all`}>
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                   </button>
-                  <button onClick={() => onDelete(game.id)} className="p-3 text-slate-600 hover:text-red-500 hover:bg-red-900/10 rounded-xl transition-all">
+                  <button onClick={() => onDelete(game.id)} className={`p-3 ${colors.mutedText} hover:text-red-500 hover:bg-red-900/10 rounded-xl transition-all`}>
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
@@ -499,19 +535,19 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
           {displayGames.map((game) => (
           <div
             key={game.id}
-            className={`bg-slate-900 rounded-2xl border-2 border-slate-800 shadow-xl group ${activeTeam === 'Partizan' ? 'hover:border-orange-500/40' : 'hover:border-blue-500/40'} transition-all duration-300 ${game.isDnp ? 'opacity-60' : ''}`}
+            className={`${colors.cardBg} rounded-2xl border-2 ${colors.cardBorder} shadow-xl group ${colors.cardHoverBorder} transition-all duration-300 ${game.isDnp ? 'opacity-60' : ''}`}
           >
             <div className="p-5 flex items-center gap-4">
               {/* Left: Date & Competition */}
               <div className="flex flex-col items-start gap-1.5 min-w-[120px]">
-                <span className="text-xs font-black bg-slate-800 text-slate-400 px-2.5 py-1 rounded-lg uppercase tracking-widest group-hover:bg-slate-700 transition-all">{game.competition}</span>
-                <span className="text-xs text-slate-600 font-black uppercase tracking-tighter">{game.date}</span>
+                <span className={`text-xs font-black ${colors.statsBg} ${colors.secondaryText} px-2.5 py-1 rounded-lg uppercase tracking-widest group-hover:opacity-80 transition-all`}>{game.competition}</span>
+                <span className={`text-xs ${colors.mutedText} font-black uppercase tracking-tighter`}>{game.date}</span>
               </div>
 
               {/* Center: Opponent & Score */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <h4 className="font-black text-xl text-white truncate oswald tracking-tight group-hover:text-orange-50 transition-colors">
+                  <h4 className={`font-black text-xl ${colors.primaryText} truncate oswald tracking-tight transition-colors`}>
                     {game.isHome ? 'vs ' : '@ '}{game.opponent}
                   </h4>
                   {game.isDnp && <span className="text-xs font-black bg-red-900/40 text-red-400 px-2 py-1 rounded-lg uppercase tracking-widest">DNP</span>}
@@ -522,7 +558,7 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
                   <span className={`text-lg font-black oswald ${game.result === 'W' ? 'text-emerald-500' : 'text-red-500'}`}>
                     {game.result} {game.finalScore}
                   </span>
-                  <span className="text-slate-600 text-xs font-black tracking-widest">({game.seasonRecord})</span>
+                  <span className={`${colors.mutedText} text-xs font-black tracking-widest`}>({game.seasonRecord})</span>
                 </div>
               </div>
 
@@ -530,26 +566,26 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
               <div className="hidden md:flex items-center gap-4">
                 {!game.isDnp ? (
                   <>
-                    {/* Minutes - highlighted with cyan */}
-                    <div className="text-center px-2 py-1 bg-cyan-600/10 rounded-lg border border-cyan-500/30">
-                      <span className="text-cyan-500 font-black uppercase text-[10px] tracking-[0.2em] block mb-0.5">MIN</span>
-                      <span className="font-black oswald text-xl text-cyan-400">{game.stats.minutes}</span>
+                    {/* Minutes - highlighted */}
+                    <div className={`text-center px-2 py-1 ${colors.accentBg} rounded-lg border ${colors.accentBorder}`}>
+                      <span className={`${colors.accentText} font-black uppercase text-[10px] tracking-[0.2em] block mb-0.5`}>MIN</span>
+                      <span className={`font-black oswald text-xl ${colors.accentText}`}>{game.stats.minutes}</span>
                     </div>
                     <div className="text-center">
-                      <span className="text-slate-600 font-black uppercase text-[10px] tracking-[0.2em] block mb-0.5">PTS</span>
-                      <span className="font-black oswald text-xl text-white">{game.stats.points}</span>
+                      <span className={`${colors.mutedText} font-black uppercase text-[10px] tracking-[0.2em] block mb-0.5`}>PTS</span>
+                      <span className={`font-black oswald text-xl ${colors.primaryText}`}>{game.stats.points}</span>
                     </div>
                     <div className="text-center">
-                      <span className="text-slate-600 font-black uppercase text-[10px] tracking-[0.2em] block mb-0.5">REB</span>
-                      <span className="font-black oswald text-xl text-white">{game.stats.rebounds}</span>
+                      <span className={`${colors.mutedText} font-black uppercase text-[10px] tracking-[0.2em] block mb-0.5`}>REB</span>
+                      <span className={`font-black oswald text-xl ${colors.primaryText}`}>{game.stats.rebounds}</span>
                     </div>
                     <div className="text-center">
-                      <span className="text-slate-600 font-black uppercase text-[10px] tracking-[0.2em] block mb-0.5">AST</span>
-                      <span className="font-black oswald text-xl text-white">{game.stats.assists}</span>
+                      <span className={`${colors.mutedText} font-black uppercase text-[10px] tracking-[0.2em] block mb-0.5`}>AST</span>
+                      <span className={`font-black oswald text-xl ${colors.primaryText}`}>{game.stats.assists}</span>
                     </div>
                   </>
                 ) : (
-                  <div className="flex items-center text-slate-700 font-black tracking-[0.3em] text-xs uppercase">
+                  <div className={`flex items-center ${colors.mutedText} font-black tracking-[0.3em] text-xs uppercase`}>
                     NOT ACTIVE
                   </div>
                 )}
@@ -557,7 +593,7 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
 
               {/* PIR Index */}
               {!game.isDnp && (
-                <div className={`bg-slate-950 rounded-xl px-4 py-2.5 text-center min-w-[70px] border-2 border-slate-800 ${activeTeam === 'Partizan' ? 'group-hover:border-orange-500/40' : 'group-hover:border-blue-500/40'} transition-all shadow-inner`}>
+                <div className={`${colors.statsBg} rounded-xl px-4 py-2.5 text-center min-w-[70px] border-2 ${colors.cardBorder} ${colors.cardHoverBorder} transition-all shadow-inner`}>
                   <p className={`text-[9px] ${colors.accentText} font-black uppercase tracking-[0.2em] leading-none mb-1`}>PIR</p>
                   <p className={`oswald text-2xl font-black ${colors.accentText} leading-none`}>{game.stats.indexRating}</p>
                 </div>
@@ -567,7 +603,7 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
               {!game.isDnp && (
                 <button
                   onClick={() => toggleExpanded(game.id)}
-                  className={`p-2.5 text-slate-600 ${activeTeam === 'Partizan' ? 'hover:text-orange-500' : 'hover:text-blue-500'} hover:bg-slate-800 rounded-xl transition-all`}
+                  className={`p-2.5 ${colors.mutedText} hover:${colors.accentText} hover:${colors.cardBg} rounded-xl transition-all`}
                   title="Show full stats"
                 >
                   <svg
@@ -583,12 +619,12 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
 
               {/* Actions */}
               <div className="flex gap-1.5">
-                <button onClick={() => onEdit(game)} className="p-2.5 text-slate-600 hover:text-white hover:bg-slate-800 rounded-xl transition-all">
+                <button onClick={() => onEdit(game)} className={`p-2.5 ${colors.mutedText} hover:${colors.primaryText} hover:${colors.cardBg} rounded-xl transition-all`}>
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
                 </button>
-                <button onClick={() => onDelete(game.id)} className="p-2.5 text-slate-600 hover:text-red-500 hover:bg-red-900/10 rounded-xl transition-all">
+                <button onClick={() => onDelete(game.id)} className={`p-2.5 ${colors.mutedText} hover:text-red-500 hover:bg-red-900/10 rounded-xl transition-all`}>
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
@@ -604,52 +640,52 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
                 }`}
               >
                 <div className="px-5 pb-5">
-                  <div className="bg-slate-950/50 rounded-2xl p-5 border border-slate-800 space-y-4">
+                  <div className={`${colors.statsBg} rounded-2xl p-5 border ${colors.cardBorder} space-y-4`}>
                     {/* Shooting Stats */}
                     <div>
-                      <h5 className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-3">Shooting</h5>
+                      <h5 className={`text-xs font-black ${colors.accentText} uppercase tracking-widest mb-3`}>Shooting</h5>
                       <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
-                        <div className="bg-slate-900/50 rounded-xl p-3 text-center border border-slate-800">
-                          <span className="text-slate-500 font-black uppercase text-[10px] tracking-wider block mb-1">2PT</span>
-                          <span className="font-black oswald text-xl text-white">{game.stats.twoPtMade}/{game.stats.twoPtAtt}</span>
-                          <span className="text-slate-600 text-xs font-bold block mt-0.5">
+                        <div className={`${colors.cardBg} rounded-xl p-3 text-center border ${colors.cardBorder}`}>
+                          <span className={`${colors.mutedText} font-black uppercase text-[10px] tracking-wider block mb-1`}>2PT</span>
+                          <span className={`font-black oswald text-xl ${colors.primaryText}`}>{game.stats.twoPtMade}/{game.stats.twoPtAtt}</span>
+                          <span className={`${colors.mutedText} text-xs font-bold block mt-0.5`}>
                             {game.stats.twoPtAtt > 0 ? ((game.stats.twoPtMade / game.stats.twoPtAtt) * 100).toFixed(0) : 0}%
                           </span>
                         </div>
-                        <div className="bg-slate-900/50 rounded-xl p-3 text-center border border-slate-800">
-                          <span className="text-slate-500 font-black uppercase text-[10px] tracking-wider block mb-1">3PT</span>
-                          <span className="font-black oswald text-xl text-white">{game.stats.threePtMade}/{game.stats.threePtAtt}</span>
-                          <span className="text-slate-600 text-xs font-bold block mt-0.5">
+                        <div className={`${colors.cardBg} rounded-xl p-3 text-center border ${colors.cardBorder}`}>
+                          <span className={`${colors.mutedText} font-black uppercase text-[10px] tracking-wider block mb-1`}>3PT</span>
+                          <span className={`font-black oswald text-xl ${colors.primaryText}`}>{game.stats.threePtMade}/{game.stats.threePtAtt}</span>
+                          <span className={`${colors.mutedText} text-xs font-bold block mt-0.5`}>
                             {game.stats.threePtAtt > 0 ? ((game.stats.threePtMade / game.stats.threePtAtt) * 100).toFixed(0) : 0}%
                           </span>
                         </div>
-                        <div className="bg-slate-900/50 rounded-xl p-3 text-center border border-slate-800">
-                          <span className="text-slate-500 font-black uppercase text-[10px] tracking-wider block mb-1">FT</span>
-                          <span className="font-black oswald text-xl text-white">{game.stats.ftMade}/{game.stats.ftAtt}</span>
-                          <span className="text-slate-600 text-xs font-bold block mt-0.5">
+                        <div className={`${colors.cardBg} rounded-xl p-3 text-center border ${colors.cardBorder}`}>
+                          <span className={`${colors.mutedText} font-black uppercase text-[10px] tracking-wider block mb-1`}>FT</span>
+                          <span className={`font-black oswald text-xl ${colors.primaryText}`}>{game.stats.ftMade}/{game.stats.ftAtt}</span>
+                          <span className={`${colors.mutedText} text-xs font-bold block mt-0.5`}>
                             {game.stats.ftAtt > 0 ? ((game.stats.ftMade / game.stats.ftAtt) * 100).toFixed(0) : 0}%
                           </span>
                         </div>
-                        <div className="bg-slate-900/50 rounded-lg p-2.5 text-center border border-slate-800">
-                          <span className="text-slate-500 font-black uppercase text-[9px] tracking-wider block">STL</span>
-                          <span className="font-black oswald text-lg text-white">{game.stats.steals}</span>
+                        <div className={`${colors.cardBg} rounded-lg p-2.5 text-center border ${colors.cardBorder}`}>
+                          <span className={`${colors.mutedText} font-black uppercase text-[9px] tracking-wider block`}>STL</span>
+                          <span className={`font-black oswald text-lg ${colors.primaryText}`}>{game.stats.steals}</span>
                         </div>
-                        <div className="bg-slate-900/50 rounded-lg p-2.5 text-center border border-slate-800">
-                          <span className="text-slate-500 font-black uppercase text-[9px] tracking-wider block">BLK</span>
-                          <span className="font-black oswald text-lg text-white">{game.stats.blocks}</span>
+                        <div className={`${colors.cardBg} rounded-lg p-2.5 text-center border ${colors.cardBorder}`}>
+                          <span className={`${colors.mutedText} font-black uppercase text-[9px] tracking-wider block`}>BLK</span>
+                          <span className={`font-black oswald text-lg ${colors.primaryText}`}>{game.stats.blocks}</span>
                         </div>
-                        <div className="bg-slate-900/50 rounded-lg p-2.5 text-center border border-slate-800">
-                          <span className="text-slate-500 font-black uppercase text-[9px] tracking-wider block">TO</span>
-                          <span className="font-black oswald text-lg text-white">{game.stats.turnovers}</span>
+                        <div className={`${colors.cardBg} rounded-lg p-2.5 text-center border ${colors.cardBorder}`}>
+                          <span className={`${colors.mutedText} font-black uppercase text-[9px] tracking-wider block`}>TO</span>
+                          <span className={`font-black oswald text-lg ${colors.primaryText}`}>{game.stats.turnovers}</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Notes */}
                     {game.notes && (
-                      <div className="bg-slate-900/50 rounded-xl p-4 border border-slate-800">
-                        <h5 className="text-xs font-black text-amber-400 uppercase tracking-widest mb-2">Notes</h5>
-                        <p className="text-base text-slate-400 italic">"{game.notes}"</p>
+                      <div className={`${colors.cardBg} rounded-xl p-4 border ${colors.cardBorder}`}>
+                        <h5 className={`text-xs font-black ${colors.accentText} uppercase tracking-widest mb-2`}>Notes</h5>
+                        <p className={`text-base ${colors.secondaryText} italic`}>"{game.notes}"</p>
                       </div>
                     )}
                   </div>

@@ -158,51 +158,109 @@ const App: React.FC = () => {
     );
   }
 
+  // Team theme colors for full page styling
+  const themeColors = {
+    Partizan: {
+      pageBg: 'bg-black',
+      headerBg: 'bg-black/90',
+      headerBorder: 'border-zinc-800',
+      tabsBg: 'bg-zinc-900/50',
+      tabsBorder: 'border-zinc-800',
+      buttonBg: 'bg-zinc-800/50',
+      buttonHover: 'hover:bg-zinc-700',
+      textPrimary: 'text-white',
+      textSecondary: 'text-zinc-400',
+      textMuted: 'text-zinc-600',
+      accent: 'text-white',
+      accentBg: 'bg-white',
+      tabActive: 'bg-zinc-800',
+      tabIndicator: 'bg-white',
+      badgeActive: 'bg-white/20 text-white',
+      badgeInactive: 'bg-zinc-800 text-zinc-500',
+      syncDot: 'bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]',
+      syncText: 'text-white',
+      navBg: 'bg-zinc-900/90',
+      navBorder: 'border-zinc-800/50',
+      navActive: 'text-white',
+      fabBg: 'bg-white',
+      fabText: 'text-black',
+      fabShadow: 'shadow-[0_20px_40px_rgba(255,255,255,0.2)]',
+    },
+    Reprezentacija: {
+      pageBg: 'bg-blue-950',
+      headerBg: 'bg-blue-950/90',
+      headerBorder: 'border-blue-900',
+      tabsBg: 'bg-blue-900/30',
+      tabsBorder: 'border-blue-900',
+      buttonBg: 'bg-blue-900/50',
+      buttonHover: 'hover:bg-blue-800',
+      textPrimary: 'text-white',
+      textSecondary: 'text-blue-200',
+      textMuted: 'text-blue-400/60',
+      accent: 'text-blue-400',
+      accentBg: 'bg-blue-500',
+      tabActive: 'bg-blue-900/60',
+      tabIndicator: 'bg-blue-400',
+      badgeActive: 'bg-blue-500/30 text-blue-200',
+      badgeInactive: 'bg-blue-900/50 text-blue-400/60',
+      syncDot: 'bg-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.5)]',
+      syncText: 'text-blue-400',
+      navBg: 'bg-blue-900/90',
+      navBorder: 'border-blue-800/50',
+      navActive: 'text-blue-400',
+      fabBg: 'bg-blue-500',
+      fabText: 'text-white',
+      fabShadow: 'shadow-[0_20px_40px_rgba(59,130,246,0.3)]',
+    }
+  };
+
+  const theme = themeColors[activeTeam];
+
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col relative overflow-x-hidden">
+    <div className={`min-h-screen ${theme.pageBg} flex flex-col relative overflow-x-hidden transition-colors duration-300`}>
       <input type="file" ref={fileInputRef} className="hidden" accept=".json" onChange={handleFileImport} />
 
-      <header className="bg-slate-950/80 backdrop-blur-2xl border-b border-slate-900 sticky top-0 z-50">
+      <header className={`${theme.headerBg} backdrop-blur-2xl border-b ${theme.headerBorder} sticky top-0 z-50 transition-colors duration-300`}>
         <div className="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
           <div className="flex items-center gap-6">
             <div className="group cursor-pointer" onClick={() => setIsAppReady(false)}>
-              <h1 className="text-2xl font-black oswald tracking-tighter text-white uppercase group-hover:scale-105 transition-transform">HOOPS<span className="text-orange-600">AI</span></h1>
-              <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.3em] mt-0.5">INTERNAL SYSTEM</p>
+              <h1 className={`text-2xl font-black oswald tracking-tighter ${theme.textPrimary} uppercase group-hover:scale-105 transition-transform`}>HOOPS<span className={theme.accent}>AI</span></h1>
+              <p className={`text-[9px] font-black ${theme.textMuted} uppercase tracking-[0.3em] mt-0.5`}>INTERNAL SYSTEM</p>
             </div>
-            
-            <button 
+
+            <button
               onClick={() => setShowSyncSettings(true)}
-              className="flex items-center gap-2.5 px-4 py-2 bg-slate-900/50 rounded-2xl border border-slate-800 hover:border-indigo-500/30 transition-all group"
+              className={`flex items-center gap-2.5 px-4 py-2 ${theme.buttonBg} rounded-2xl border ${theme.headerBorder} ${theme.buttonHover} transition-all group`}
             >
               <div className={`w-2 h-2 rounded-full ${
-                syncStatus === 'synced' ? 'bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]' : 
-                syncStatus === 'syncing' ? 'bg-amber-500 animate-pulse' : 
+                syncStatus === 'synced' ? theme.syncDot :
+                syncStatus === 'syncing' ? 'bg-amber-500 animate-pulse' :
                 syncStatus === 'unauthorized' ? 'bg-orange-500' :
                 syncStatus === 'error' ? 'bg-red-500' :
                 'bg-slate-700'
               }`} />
               <div className="flex flex-col">
-                <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-300 leading-none">
+                <span className={`text-[9px] font-black uppercase tracking-widest ${theme.textSecondary} group-hover:text-white leading-none`}>
                   {syncStatus === 'synced' ? 'Cloud Active' : syncStatus === 'syncing' ? 'Syncing...' : syncStatus === 'error' ? 'Sync Error' : 'Local Only'}
                 </span>
                 {lastSync && syncStatus === 'synced' && (
-                  <span className="text-[7px] font-black text-indigo-500 uppercase tracking-widest mt-1 opacity-60">Last Sync: {lastSync}</span>
+                  <span className={`text-[7px] font-black ${theme.syncText} uppercase tracking-widest mt-1 opacity-60`}>Last Sync: {lastSync}</span>
                 )}
               </div>
             </button>
           </div>
 
           <div className="flex gap-2">
-            <button onClick={() => fileInputRef.current?.click()} className="p-3 bg-slate-900/50 rounded-2xl text-slate-500 hover:text-white hover:bg-slate-900 transition-all">
+            <button onClick={() => fileInputRef.current?.click()} className={`p-3 ${theme.buttonBg} rounded-2xl ${theme.textSecondary} hover:text-white ${theme.buttonHover} transition-all`}>
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
             </button>
-            <button onClick={handleExport} className="p-3 bg-slate-900/50 rounded-2xl text-slate-500 hover:text-white hover:bg-slate-900 transition-all">
+            <button onClick={handleExport} className={`p-3 ${theme.buttonBg} rounded-2xl ${theme.textSecondary} hover:text-white ${theme.buttonHover} transition-all`}>
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
             </button>
-            <button onClick={handleReset} className="p-3 bg-slate-900/50 rounded-2xl text-slate-500 hover:text-red-500 hover:bg-red-900/10 transition-all">
+            <button onClick={handleReset} className={`p-3 ${theme.buttonBg} rounded-2xl ${theme.textSecondary} hover:text-red-500 hover:bg-red-900/10 transition-all`}>
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
             </button>
-            <button onClick={async () => { await storageService.signOut(); window.location.reload(); }} className="p-3 bg-slate-900/50 rounded-2xl text-slate-500 hover:text-orange-500 hover:bg-orange-900/10 transition-all">
+            <button onClick={async () => { await storageService.signOut(); window.location.reload(); }} className={`p-3 ${theme.buttonBg} rounded-2xl ${theme.textSecondary} hover:text-red-400 hover:bg-red-900/10 transition-all`}>
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
             </button>
           </div>
@@ -210,41 +268,41 @@ const App: React.FC = () => {
       </header>
 
       {/* Team Tabs */}
-      <div className="bg-slate-900/30 border-b-2 border-slate-900">
+      <div className={`${theme.tabsBg} border-b-2 ${theme.tabsBorder} transition-colors duration-300`}>
         <div className="max-w-7xl mx-auto w-full px-6">
           <div className="flex gap-2">
             <button
               onClick={() => setActiveTeam('Partizan')}
               className={`px-8 py-5 text-2xl font-black oswald uppercase tracking-tight transition-all relative flex items-center gap-3 ${
                 activeTeam === 'Partizan'
-                  ? 'text-white bg-slate-900/50'
-                  : 'text-slate-600 hover:text-slate-400 hover:bg-slate-900/20'
+                  ? `text-white ${themeColors.Partizan.tabActive}`
+                  : `${theme.textMuted} hover:text-white/60 hover:bg-white/5`
               }`}
             >
               <span className="text-2xl">⚫</span>
               <span>PARTIZAN</span>
-              <span className={`text-sm px-2.5 py-1 rounded-full font-bold ${activeTeam === 'Partizan' ? 'bg-orange-600 text-white' : 'bg-slate-800 text-slate-500'}`}>
+              <span className={`text-sm px-2.5 py-1 rounded-full font-bold ${activeTeam === 'Partizan' ? themeColors.Partizan.badgeActive : theme.badgeInactive}`}>
                 {games.filter((g: GameEntry) => g.team === 'Partizan').length}
               </span>
               {activeTeam === 'Partizan' && (
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-orange-600" />
+                <div className={`absolute bottom-0 left-0 right-0 h-1 ${themeColors.Partizan.tabIndicator}`} />
               )}
             </button>
             <button
               onClick={() => setActiveTeam('Reprezentacija')}
               className={`px-8 py-5 text-2xl font-black oswald uppercase tracking-tight transition-all relative flex items-center gap-3 ${
                 activeTeam === 'Reprezentacija'
-                  ? 'text-white bg-slate-900/50'
-                  : 'text-slate-600 hover:text-slate-400 hover:bg-slate-900/20'
+                  ? `text-white ${themeColors.Reprezentacija.tabActive}`
+                  : `${theme.textMuted} hover:text-white/60 hover:bg-white/5`
               }`}
             >
               <span className="text-2xl">🇷🇸</span>
               <span>REPREZENTACIJA</span>
-              <span className={`text-sm px-2.5 py-1 rounded-full font-bold ${activeTeam === 'Reprezentacija' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-500'}`}>
+              <span className={`text-sm px-2.5 py-1 rounded-full font-bold ${activeTeam === 'Reprezentacija' ? themeColors.Reprezentacija.badgeActive : theme.badgeInactive}`}>
                 {games.filter((g: GameEntry) => g.team === 'Reprezentacija').length}
               </span>
               {activeTeam === 'Reprezentacija' && (
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600" />
+                <div className={`absolute bottom-0 left-0 right-0 h-1 ${themeColors.Reprezentacija.tabIndicator}`} />
               )}
             </button>
           </div>
@@ -271,23 +329,23 @@ const App: React.FC = () => {
       {view !== 'add' && (
         <button
           onClick={() => setView('add')}
-          className={`fixed bottom-28 right-8 w-16 h-16 ${activeTeam === 'Partizan' ? 'bg-orange-600 hover:bg-orange-500 shadow-[0_20px_40px_rgba(234,88,12,0.3)]' : 'bg-blue-600 hover:bg-blue-500 shadow-[0_20px_40px_rgba(37,99,235,0.3)]'} rounded-3xl flex items-center justify-center z-40 active:scale-90 transition-all hover:-translate-y-1`}
+          className={`fixed bottom-28 right-8 w-16 h-16 ${theme.fabBg} ${theme.fabShadow} rounded-3xl flex items-center justify-center z-40 active:scale-90 transition-all hover:-translate-y-1 hover:opacity-90`}
         >
-          <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" /></svg>
+          <svg className={`w-8 h-8 ${theme.fabText}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" /></svg>
         </button>
       )}
 
       <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-sm">
-        <div className="bg-slate-900/80 backdrop-blur-2xl border border-slate-800/50 rounded-[32px] shadow-2xl px-10 py-5 flex justify-between items-center">
-          <button onClick={() => setView('list')} className={`flex flex-col items-center gap-2 transition-all ${view === 'list' ? (activeTeam === 'Partizan' ? 'text-orange-500' : 'text-blue-500') + ' scale-110' : 'text-slate-500 hover:text-slate-300'}`}>
+        <div className={`${theme.navBg} backdrop-blur-2xl border ${theme.navBorder} rounded-[32px] shadow-2xl px-10 py-5 flex justify-between items-center transition-colors duration-300`}>
+          <button onClick={() => setView('list')} className={`flex flex-col items-center gap-2 transition-all ${view === 'list' ? `${theme.navActive} scale-110` : `${theme.textSecondary} hover:text-white`}`}>
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
             <span className="text-xs font-black uppercase tracking-widest">History</span>
           </button>
-          <button onClick={() => setView('stats')} className={`flex flex-col items-center gap-2 transition-all ${view === 'stats' ? (activeTeam === 'Partizan' ? 'text-orange-500' : 'text-blue-500') + ' scale-110' : 'text-slate-500 hover:text-slate-300'}`}>
+          <button onClick={() => setView('stats')} className={`flex flex-col items-center gap-2 transition-all ${view === 'stats' ? `${theme.navActive} scale-110` : `${theme.textSecondary} hover:text-white`}`}>
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
             <span className="text-xs font-black uppercase tracking-widest">Insights</span>
           </button>
-          <button onClick={() => setShowSyncSettings(true)} className={`flex flex-col items-center gap-2 transition-all ${showSyncSettings ? (activeTeam === 'Partizan' ? 'text-orange-500' : 'text-blue-500') + ' scale-110' : 'text-slate-500 hover:text-slate-300'}`}>
+          <button onClick={() => setShowSyncSettings(true)} className={`flex flex-col items-center gap-2 transition-all ${showSyncSettings ? `${theme.navActive} scale-110` : `${theme.textSecondary} hover:text-white`}`}>
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
             <span className="text-xs font-black uppercase tracking-widest">Storage</span>
           </button>
