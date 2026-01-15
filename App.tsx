@@ -22,6 +22,11 @@ const App: React.FC = () => {
   const [config, setConfig] = useState<StorageConfig>(storageService.getConfig());
   const [activeTeam, setActiveTeam] = useState<'Partizan' | 'Reprezentacija'>('Partizan');
 
+  // Auto-scroll to top when view changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [view, activeTeam]);
+
   useEffect(() => {
     const unsubStatus = storageService.onStatusChange(setSyncStatus);
     const unsubUser = storageService.onUserChange(setUser);

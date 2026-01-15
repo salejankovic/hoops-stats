@@ -17,6 +17,11 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete }) =
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [resultFilter, setResultFilter] = useState<'All' | 'W' | 'L'>('All');
   const [venueFilter, setVenueFilter] = useState<'All' | 'Home' | 'Away'>('All');
+  const [expandedGameId, setExpandedGameId] = useState<string | null>(null);
+
+  const toggleExpanded = (gameId: string) => {
+    setExpandedGameId(expandedGameId === gameId ? null : gameId);
+  };
 
   const seasons = useMemo(() => {
     const s = Array.from(new Set(games.map(g => g.season))) as string[];
@@ -331,28 +336,116 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete }) =
 
               <div className="bg-slate-950/50 px-8 py-6 border-t-2 border-slate-800 group-hover:bg-slate-950/80 transition-all">
                 {!game.isDnp ? (
-                  <div className="grid grid-cols-3 md:grid-cols-5 gap-3 md:gap-4">
-                    <div className="flex flex-col items-center justify-center p-3 bg-slate-900/50 rounded-xl border border-slate-800">
-                      <span className="text-slate-600 font-black uppercase text-[8px] tracking-[0.2em] mb-1.5">MIN</span>
-                      <span className="font-black oswald text-xl md:text-2xl text-white">{game.stats.minutes}</span>
+                  <>
+                    <div className="grid grid-cols-3 md:grid-cols-5 gap-3 md:gap-4">
+                      <div className="flex flex-col items-center justify-center p-3 bg-slate-900/50 rounded-xl border border-slate-800">
+                        <span className="text-slate-600 font-black uppercase text-[8px] tracking-[0.2em] mb-1.5">MIN</span>
+                        <span className="font-black oswald text-xl md:text-2xl text-white">{game.stats.minutes}</span>
+                      </div>
+                      <div className="flex flex-col items-center justify-center p-3 bg-slate-900/50 rounded-xl border border-slate-800">
+                        <span className="text-slate-600 font-black uppercase text-[8px] tracking-[0.2em] mb-1.5">PTS</span>
+                        <span className="font-black oswald text-xl md:text-2xl text-white">{game.stats.points}</span>
+                      </div>
+                      <div className="flex flex-col items-center justify-center p-3 bg-slate-900/50 rounded-xl border border-slate-800">
+                        <span className="text-slate-600 font-black uppercase text-[8px] tracking-[0.2em] mb-1.5">REB</span>
+                        <span className="font-black oswald text-xl md:text-2xl text-white">{game.stats.rebounds}</span>
+                      </div>
+                      <div className="flex flex-col items-center justify-center p-3 bg-slate-900/50 rounded-xl border border-slate-800">
+                        <span className="text-slate-600 font-black uppercase text-[8px] tracking-[0.2em] mb-1.5">AST</span>
+                        <span className="font-black oswald text-xl md:text-2xl text-white">{game.stats.assists}</span>
+                      </div>
+                      <div className="flex flex-col items-center justify-center p-3 bg-orange-600/10 rounded-xl border-2 border-orange-500/30 col-span-2 md:col-span-1">
+                        <span className="text-orange-500/70 font-black uppercase text-[8px] tracking-[0.2em] mb-1.5">PIR</span>
+                        <span className="font-black oswald text-xl md:text-2xl text-orange-500">{game.stats.indexRating}</span>
+                      </div>
                     </div>
-                    <div className="flex flex-col items-center justify-center p-3 bg-slate-900/50 rounded-xl border border-slate-800">
-                      <span className="text-slate-600 font-black uppercase text-[8px] tracking-[0.2em] mb-1.5">PTS</span>
-                      <span className="font-black oswald text-xl md:text-2xl text-white">{game.stats.points}</span>
+
+                    {/* Expand Stats Button */}
+                    <button
+                      onClick={() => toggleExpanded(game.id)}
+                      className="w-full mt-4 py-3 flex items-center justify-center gap-2 text-slate-500 hover:text-orange-500 transition-all rounded-xl hover:bg-slate-900/50"
+                    >
+                      <span className="text-[10px] font-black uppercase tracking-widest">
+                        {expandedGameId === game.id ? 'Hide Details' : 'Show Full Stats'}
+                      </span>
+                      <svg
+                        className={`w-4 h-4 transition-transform duration-300 ${expandedGameId === game.id ? 'rotate-180' : ''}`}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+
+                    {/* Expanded Stats Section */}
+                    <div
+                      className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                        expandedGameId === game.id ? 'max-h-[500px] opacity-100 mt-4' : 'max-h-0 opacity-0'
+                      }`}
+                    >
+                      <div className="bg-slate-900/80 rounded-2xl p-5 border border-slate-800 space-y-5">
+                        {/* Shooting Stats */}
+                        <div>
+                          <h5 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3">Shooting</h5>
+                          <div className="grid grid-cols-3 gap-3">
+                            <div className="bg-slate-950/50 rounded-xl p-3 text-center border border-slate-800">
+                              <span className="text-slate-500 font-black uppercase text-[8px] tracking-wider block mb-1">2PT</span>
+                              <span className="font-black oswald text-lg text-white">{game.stats.twoPtMade}/{game.stats.twoPtAtt}</span>
+                              <span className="text-slate-600 text-[10px] font-bold block mt-0.5">
+                                {game.stats.twoPtAtt > 0 ? ((game.stats.twoPtMade / game.stats.twoPtAtt) * 100).toFixed(0) : 0}%
+                              </span>
+                            </div>
+                            <div className="bg-slate-950/50 rounded-xl p-3 text-center border border-slate-800">
+                              <span className="text-slate-500 font-black uppercase text-[8px] tracking-wider block mb-1">3PT</span>
+                              <span className="font-black oswald text-lg text-white">{game.stats.threePtMade}/{game.stats.threePtAtt}</span>
+                              <span className="text-slate-600 text-[10px] font-bold block mt-0.5">
+                                {game.stats.threePtAtt > 0 ? ((game.stats.threePtMade / game.stats.threePtAtt) * 100).toFixed(0) : 0}%
+                              </span>
+                            </div>
+                            <div className="bg-slate-950/50 rounded-xl p-3 text-center border border-slate-800">
+                              <span className="text-slate-500 font-black uppercase text-[8px] tracking-wider block mb-1">FT</span>
+                              <span className="font-black oswald text-lg text-white">{game.stats.ftMade}/{game.stats.ftAtt}</span>
+                              <span className="text-slate-600 text-[10px] font-bold block mt-0.5">
+                                {game.stats.ftAtt > 0 ? ((game.stats.ftMade / game.stats.ftAtt) * 100).toFixed(0) : 0}%
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Other Stats */}
+                        <div>
+                          <h5 className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-3">Other Stats</h5>
+                          <div className="grid grid-cols-4 gap-2">
+                            <div className="bg-slate-950/50 rounded-lg p-2 text-center border border-slate-800">
+                              <span className="text-slate-500 font-black uppercase text-[7px] tracking-wider block">STL</span>
+                              <span className="font-black oswald text-base text-white">{game.stats.steals}</span>
+                            </div>
+                            <div className="bg-slate-950/50 rounded-lg p-2 text-center border border-slate-800">
+                              <span className="text-slate-500 font-black uppercase text-[7px] tracking-wider block">BLK</span>
+                              <span className="font-black oswald text-base text-white">{game.stats.blocks}</span>
+                            </div>
+                            <div className="bg-slate-950/50 rounded-lg p-2 text-center border border-slate-800">
+                              <span className="text-slate-500 font-black uppercase text-[7px] tracking-wider block">TO</span>
+                              <span className="font-black oswald text-base text-red-400">{game.stats.turnovers}</span>
+                            </div>
+                            <div className="bg-slate-950/50 rounded-lg p-2 text-center border border-slate-800">
+                              <span className="text-slate-500 font-black uppercase text-[7px] tracking-wider block">FOULS</span>
+                              <span className="font-black oswald text-base text-white">{game.stats.fouls}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Notes */}
+                        {game.notes && (
+                          <div className="bg-slate-950/50 rounded-xl p-4 border border-slate-800">
+                            <h5 className="text-[10px] font-black text-amber-400 uppercase tracking-widest mb-2">Notes</h5>
+                            <p className="text-sm text-slate-400 italic">"{game.notes}"</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex flex-col items-center justify-center p-3 bg-slate-900/50 rounded-xl border border-slate-800">
-                      <span className="text-slate-600 font-black uppercase text-[8px] tracking-[0.2em] mb-1.5">REB</span>
-                      <span className="font-black oswald text-xl md:text-2xl text-white">{game.stats.rebounds}</span>
-                    </div>
-                    <div className="flex flex-col items-center justify-center p-3 bg-slate-900/50 rounded-xl border border-slate-800">
-                      <span className="text-slate-600 font-black uppercase text-[8px] tracking-[0.2em] mb-1.5">AST</span>
-                      <span className="font-black oswald text-xl md:text-2xl text-white">{game.stats.assists}</span>
-                    </div>
-                    <div className="flex flex-col items-center justify-center p-3 bg-orange-600/10 rounded-xl border-2 border-orange-500/30 col-span-2 md:col-span-1">
-                      <span className="text-orange-500/70 font-black uppercase text-[8px] tracking-[0.2em] mb-1.5">PIR</span>
-                      <span className="font-black oswald text-xl md:text-2xl text-orange-500">{game.stats.indexRating}</span>
-                    </div>
-                  </div>
+                  </>
                 ) : (
                   <div className="flex items-center justify-center text-slate-700 font-black tracking-[0.4em] text-xs uppercase py-4">
                     NOT ACTIVE
@@ -445,6 +538,24 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete }) =
                 </div>
               )}
 
+              {/* Expand Button */}
+              {!game.isDnp && (
+                <button
+                  onClick={() => toggleExpanded(game.id)}
+                  className="p-2.5 text-slate-600 hover:text-orange-500 hover:bg-slate-800 rounded-xl transition-all"
+                  title="Show full stats"
+                >
+                  <svg
+                    className={`w-4 h-4 transition-transform duration-300 ${expandedGameId === game.id ? 'rotate-180' : ''}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              )}
+
               {/* Actions */}
               <div className="flex gap-1.5">
                 <button onClick={() => onEdit(game)} className="p-2.5 text-slate-600 hover:text-white hover:bg-slate-800 rounded-xl transition-all">
@@ -459,6 +570,67 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete }) =
                 </button>
               </div>
             </div>
+
+            {/* Expanded Stats Section for List View */}
+            {!game.isDnp && (
+              <div
+                className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                  expandedGameId === game.id ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'
+                }`}
+              >
+                <div className="px-5 pb-5">
+                  <div className="bg-slate-950/50 rounded-2xl p-5 border border-slate-800 space-y-4">
+                    {/* Shooting Stats */}
+                    <div>
+                      <h5 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3">Shooting</h5>
+                      <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+                        <div className="bg-slate-900/50 rounded-xl p-3 text-center border border-slate-800">
+                          <span className="text-slate-500 font-black uppercase text-[8px] tracking-wider block mb-1">2PT</span>
+                          <span className="font-black oswald text-lg text-white">{game.stats.twoPtMade}/{game.stats.twoPtAtt}</span>
+                          <span className="text-slate-600 text-[10px] font-bold block mt-0.5">
+                            {game.stats.twoPtAtt > 0 ? ((game.stats.twoPtMade / game.stats.twoPtAtt) * 100).toFixed(0) : 0}%
+                          </span>
+                        </div>
+                        <div className="bg-slate-900/50 rounded-xl p-3 text-center border border-slate-800">
+                          <span className="text-slate-500 font-black uppercase text-[8px] tracking-wider block mb-1">3PT</span>
+                          <span className="font-black oswald text-lg text-white">{game.stats.threePtMade}/{game.stats.threePtAtt}</span>
+                          <span className="text-slate-600 text-[10px] font-bold block mt-0.5">
+                            {game.stats.threePtAtt > 0 ? ((game.stats.threePtMade / game.stats.threePtAtt) * 100).toFixed(0) : 0}%
+                          </span>
+                        </div>
+                        <div className="bg-slate-900/50 rounded-xl p-3 text-center border border-slate-800">
+                          <span className="text-slate-500 font-black uppercase text-[8px] tracking-wider block mb-1">FT</span>
+                          <span className="font-black oswald text-lg text-white">{game.stats.ftMade}/{game.stats.ftAtt}</span>
+                          <span className="text-slate-600 text-[10px] font-bold block mt-0.5">
+                            {game.stats.ftAtt > 0 ? ((game.stats.ftMade / game.stats.ftAtt) * 100).toFixed(0) : 0}%
+                          </span>
+                        </div>
+                        <div className="bg-slate-900/50 rounded-lg p-2.5 text-center border border-slate-800">
+                          <span className="text-slate-500 font-black uppercase text-[7px] tracking-wider block">STL</span>
+                          <span className="font-black oswald text-base text-white">{game.stats.steals}</span>
+                        </div>
+                        <div className="bg-slate-900/50 rounded-lg p-2.5 text-center border border-slate-800">
+                          <span className="text-slate-500 font-black uppercase text-[7px] tracking-wider block">BLK</span>
+                          <span className="font-black oswald text-base text-white">{game.stats.blocks}</span>
+                        </div>
+                        <div className="bg-slate-900/50 rounded-lg p-2.5 text-center border border-slate-800">
+                          <span className="text-slate-500 font-black uppercase text-[7px] tracking-wider block">TO</span>
+                          <span className="font-black oswald text-base text-red-400">{game.stats.turnovers}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Notes */}
+                    {game.notes && (
+                      <div className="bg-slate-900/50 rounded-xl p-4 border border-slate-800">
+                        <h5 className="text-[10px] font-black text-amber-400 uppercase tracking-widest mb-2">Notes</h5>
+                        <p className="text-sm text-slate-400 italic">"{game.notes}"</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         ))}
         </div>
