@@ -319,6 +319,7 @@ const App: React.FC = () => {
               onCancel={() => { setView('list'); setEditingGame(null); }}
               initialData={editingGame}
               existingGames={games.filter(g => g.team === activeTeam)}
+              activeTeam={activeTeam}
             />
           )}
         </div>
