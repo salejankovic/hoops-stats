@@ -10,32 +10,11 @@ import { Auth } from './components/Auth';
 import { exportToCSV, exportToJSON } from './utils/parser';
 import { storageService } from './services/storage';
 
-// Local storage key for app settings (teams/competitions)
-const APP_SETTINGS_KEY = 'hoops_app_settings';
-
 // Default settings
 const getDefaultSettings = (): AppSettings => ({
   teams: [],
   competitions: []
 });
-
-// Load settings from localStorage
-const loadAppSettings = (): AppSettings => {
-  try {
-    const saved = localStorage.getItem(APP_SETTINGS_KEY);
-    if (saved) {
-      return JSON.parse(saved);
-    }
-  } catch (e) {
-    console.error('Failed to load app settings:', e);
-  }
-  return getDefaultSettings();
-};
-
-// Save settings to localStorage
-const saveAppSettings = (settings: AppSettings) => {
-  localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(settings));
-};
 
 const App: React.FC = () => {
   const [games, setGames] = useState<GameEntry[]>([]);
@@ -46,11 +25,20 @@ const App: React.FC = () => {
   const [lastSync, setLastSync] = useState<string | null>(storageService.getLastSync());
   const [showSyncSettings, setShowSyncSettings] = useState(false);
   const [showTeamManager, setShowTeamManager] = useState(false);
-  const [appSettings, setAppSettings] = useState<AppSettings>(loadAppSettings());
+  const [appSettings, setAppSettings] = useState<AppSettings>(getDefaultSettings());
   const [isAppReady, setIsAppReady] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [config, setConfig] = useState<StorageConfig>(storageService.getConfig());
   const [activeTeam, setActiveTeam] = useState<'Partizan' | 'Reprezentacija'>('Partizan');
+
+  // Load app settings from Supabase on mount and when user changes
+  useEffect(() => {
+    const loadSettings = async () => {
+      const settings = await storageService.loadAppSettings();
+      setAppSettings(settings);
+    };
+    loadSettings();
+  }, [user]);
 
   // Auto-sync teams/competitions from games to settings
   useEffect(() => {
@@ -89,7 +77,7 @@ const App: React.FC = () => {
           competitions: [...appSettings.competitions, ...newComps]
         };
         setAppSettings(updatedSettings);
-        saveAppSettings(updatedSettings);
+        storageService.saveAppSettings(updatedSettings);
       }
     }
   }, [games]);
@@ -97,7 +85,7 @@ const App: React.FC = () => {
   // Handle saving settings from the manager
   const handleSaveSettings = (settings: AppSettings) => {
     setAppSettings(settings);
-    saveAppSettings(settings);
+    storageService.saveAppSettings(settings);
   };
 
   // Helper to get team logo by name

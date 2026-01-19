@@ -1,10 +1,17 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { GameEntry, StorageConfig, SyncStatus, UserProfile } from '../types';
+import { GameEntry, StorageConfig, SyncStatus, UserProfile, AppSettings } from '../types';
 
 const LOCAL_KEY = 'hoops_stats_data';
 const CONFIG_KEY = 'hoops_stats_config';
 const SYNC_KEY = 'hoops_stats_last_sync';
+const APP_SETTINGS_KEY = 'hoops_app_settings';
+
+// Default app settings
+const getDefaultAppSettings = (): AppSettings => ({
+  teams: [],
+  competitions: []
+});
 
 type Listener<T> = (data: T) => void;
 
@@ -279,6 +286,81 @@ class StorageService {
     } catch (error) {
       console.error('Error deleting game from Supabase:', error);
       this.notifyStatusListeners('error');
+    }
+  }
+
+  // Load app settings (teams/competitions with logos) from Supabase
+  async loadAppSettings(): Promise<AppSettings> {
+    // Always try localStorage first as a cache
+    let localSettings: AppSettings = getDefaultAppSettings();
+    const saved = localStorage.getItem(APP_SETTINGS_KEY);
+    if (saved) {
+      try {
+        localSettings = JSON.parse(saved);
+      } catch (e) {
+        console.error("Failed to parse local app settings", e);
+      }
+    }
+
+    if (!this.client || !this.currentUser) {
+      return localSettings;
+    }
+
+    try {
+      const { data, error } = await this.client
+        .from('app_settings')
+        .select('*')
+        .eq('user_id', this.currentUser.uid)
+        .single();
+
+      if (error) {
+        // If no settings exist yet, that's OK - return local/default
+        if (error.code === 'PGRST116') {
+          return localSettings;
+        }
+        throw error;
+      }
+
+      if (data?.settings) {
+        const settings = data.settings as AppSettings;
+        // Save to localStorage as cache
+        localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(settings));
+        return settings;
+      }
+
+      return localSettings;
+    } catch (error) {
+      console.error('Error loading app settings from Supabase:', error);
+      return localSettings;
+    }
+  }
+
+  // Save app settings (teams/competitions with logos) to Supabase
+  async saveAppSettings(settings: AppSettings): Promise<void> {
+    // Always save to localStorage first as cache
+    localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(settings));
+
+    if (!this.client || !this.currentUser) {
+      return;
+    }
+
+    try {
+      // Upsert the settings (insert or update)
+      const { error } = await this.client
+        .from('app_settings')
+        .upsert({
+          user_id: this.currentUser.uid,
+          settings: settings,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id'
+        });
+
+      if (error) throw error;
+
+      this.updateSyncTime();
+    } catch (error) {
+      console.error('Error saving app settings to Supabase:', error);
     }
   }
 }
