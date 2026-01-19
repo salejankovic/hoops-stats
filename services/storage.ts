@@ -291,7 +291,7 @@ class StorageService {
 
   // Load app settings (teams/competitions with logos) from Supabase
   async loadAppSettings(): Promise<AppSettings> {
-    // Always try localStorage first as a cache
+    // Get localStorage settings as fallback
     let localSettings: AppSettings = getDefaultAppSettings();
     const saved = localStorage.getItem(APP_SETTINGS_KEY);
     if (saved) {
@@ -302,11 +302,14 @@ class StorageService {
       }
     }
 
+    // If not connected to Supabase or no user, return local settings
     if (!this.client || !this.currentUser) {
+      console.log('[AppSettings] No Supabase client or user, returning local settings');
       return localSettings;
     }
 
     try {
+      console.log('[AppSettings] Loading from Supabase for user:', this.currentUser.uid);
       const { data, error } = await this.client
         .from('app_settings')
         .select('*')
@@ -316,18 +319,22 @@ class StorageService {
       if (error) {
         // If no settings exist yet, that's OK - return local/default
         if (error.code === 'PGRST116') {
+          console.log('[AppSettings] No settings in Supabase yet, returning local settings');
           return localSettings;
         }
+        console.error('[AppSettings] Supabase error:', error);
         throw error;
       }
 
       if (data?.settings) {
         const settings = data.settings as AppSettings;
+        console.log('[AppSettings] Loaded from Supabase:', settings.teams.length, 'teams,', settings.competitions.length, 'competitions');
         // Save to localStorage as cache
         localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(settings));
         return settings;
       }
 
+      console.log('[AppSettings] No settings data, returning local');
       return localSettings;
     } catch (error) {
       console.error('Error loading app settings from Supabase:', error);
@@ -339,12 +346,15 @@ class StorageService {
   async saveAppSettings(settings: AppSettings): Promise<void> {
     // Always save to localStorage first as cache
     localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(settings));
+    console.log('[AppSettings] Saved to localStorage:', settings.teams.length, 'teams,', settings.competitions.length, 'competitions');
 
     if (!this.client || !this.currentUser) {
+      console.log('[AppSettings] No Supabase client or user, skipping cloud save');
       return;
     }
 
     try {
+      console.log('[AppSettings] Saving to Supabase for user:', this.currentUser.uid);
       // Upsert the settings (insert or update)
       const { error } = await this.client
         .from('app_settings')
@@ -356,8 +366,12 @@ class StorageService {
           onConflict: 'user_id'
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('[AppSettings] Supabase save error:', error);
+        throw error;
+      }
 
+      console.log('[AppSettings] Successfully saved to Supabase');
       this.updateSyncTime();
     } catch (error) {
       console.error('Error saving app settings to Supabase:', error);
