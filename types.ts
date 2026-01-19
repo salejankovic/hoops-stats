@@ -61,3 +61,25 @@ export interface UserProfile {
   uid: string;
   email: string | null;
 }
+
+// Team configuration with logo support
+export interface TeamConfig {
+  id: string;
+  name: string;
+  logo?: string; // Base64 encoded image or URL
+  shortName?: string;
+}
+
+// Competition configuration with logo support
+export interface CompetitionConfig {
+  id: string;
+  name: string;
+  logo?: string; // Base64 encoded image or URL
+  shortName?: string;
+}
+
+// App settings for teams and competitions
+export interface AppSettings {
+  teams: TeamConfig[];
+  competitions: CompetitionConfig[];
+}

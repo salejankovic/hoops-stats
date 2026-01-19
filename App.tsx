@@ -1,13 +1,41 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { GameEntry, SyncStatus, UserProfile, StorageConfig } from './types';
+import { GameEntry, SyncStatus, UserProfile, StorageConfig, AppSettings, TeamConfig, CompetitionConfig } from './types';
 import { GameList } from './components/GameList';
 import { GameForm } from './components/GameForm';
 import { StatsDashboard } from './components/StatsDashboard';
 import { SyncSettings } from './components/SyncSettings';
+import { TeamCompetitionManager } from './components/TeamCompetitionManager';
 import { Auth } from './components/Auth';
 import { exportToCSV, exportToJSON } from './utils/parser';
 import { storageService } from './services/storage';
+
+// Local storage key for app settings (teams/competitions)
+const APP_SETTINGS_KEY = 'hoops_app_settings';
+
+// Default settings
+const getDefaultSettings = (): AppSettings => ({
+  teams: [],
+  competitions: []
+});
+
+// Load settings from localStorage
+const loadAppSettings = (): AppSettings => {
+  try {
+    const saved = localStorage.getItem(APP_SETTINGS_KEY);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch (e) {
+    console.error('Failed to load app settings:', e);
+  }
+  return getDefaultSettings();
+};
+
+// Save settings to localStorage
+const saveAppSettings = (settings: AppSettings) => {
+  localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(settings));
+};
 
 const App: React.FC = () => {
   const [games, setGames] = useState<GameEntry[]>([]);
@@ -17,10 +45,72 @@ const App: React.FC = () => {
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('offline');
   const [lastSync, setLastSync] = useState<string | null>(storageService.getLastSync());
   const [showSyncSettings, setShowSyncSettings] = useState(false);
+  const [showTeamManager, setShowTeamManager] = useState(false);
+  const [appSettings, setAppSettings] = useState<AppSettings>(loadAppSettings());
   const [isAppReady, setIsAppReady] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [config, setConfig] = useState<StorageConfig>(storageService.getConfig());
   const [activeTeam, setActiveTeam] = useState<'Partizan' | 'Reprezentacija'>('Partizan');
+
+  // Auto-sync teams/competitions from games to settings
+  useEffect(() => {
+    if (games.length > 0) {
+      const existingTeamNames = new Set(appSettings.teams.map(t => t.name.toLowerCase()));
+      const existingCompNames = new Set(appSettings.competitions.map(c => c.name.toLowerCase()));
+
+      const newTeams: TeamConfig[] = [];
+      const newComps: CompetitionConfig[] = [];
+
+      games.forEach(game => {
+        // Add opponent teams that don't exist
+        if (game.opponent && !existingTeamNames.has(game.opponent.toLowerCase())) {
+          existingTeamNames.add(game.opponent.toLowerCase());
+          newTeams.push({
+            id: `team_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+            name: game.opponent,
+            shortName: game.opponent.substring(0, 3).toUpperCase()
+          });
+        }
+
+        // Add competitions that don't exist
+        if (game.competition && !existingCompNames.has(game.competition.toLowerCase())) {
+          existingCompNames.add(game.competition.toLowerCase());
+          newComps.push({
+            id: `comp_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+            name: game.competition,
+            shortName: game.competition.substring(0, 3).toUpperCase()
+          });
+        }
+      });
+
+      if (newTeams.length > 0 || newComps.length > 0) {
+        const updatedSettings = {
+          teams: [...appSettings.teams, ...newTeams],
+          competitions: [...appSettings.competitions, ...newComps]
+        };
+        setAppSettings(updatedSettings);
+        saveAppSettings(updatedSettings);
+      }
+    }
+  }, [games]);
+
+  // Handle saving settings from the manager
+  const handleSaveSettings = (settings: AppSettings) => {
+    setAppSettings(settings);
+    saveAppSettings(settings);
+  };
+
+  // Helper to get team logo by name
+  const getTeamLogo = (teamName: string): string | undefined => {
+    const team = appSettings.teams.find(t => t.name.toLowerCase() === teamName.toLowerCase());
+    return team?.logo;
+  };
+
+  // Helper to get competition logo by name
+  const getCompetitionLogo = (compName: string): string | undefined => {
+    const comp = appSettings.competitions.find(c => c.name.toLowerCase() === compName.toLowerCase());
+    return comp?.logo;
+  };
 
   // Auto-scroll to top when view changes
   useEffect(() => {
@@ -251,10 +341,14 @@ const App: React.FC = () => {
           </div>
 
           <div className="flex gap-2">
-            <button onClick={() => fileInputRef.current?.click()} className={`p-3 ${theme.buttonBg} rounded-2xl ${theme.textSecondary} hover:text-white ${theme.buttonHover} transition-all`}>
+            {/* Team & Competition Settings */}
+            <button onClick={() => setShowTeamManager(true)} className={`p-3 ${theme.buttonBg} rounded-2xl ${theme.textSecondary} hover:text-white ${theme.buttonHover} transition-all`} title="Team & Competition Settings">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            </button>
+            <button onClick={() => fileInputRef.current?.click()} className={`p-3 ${theme.buttonBg} rounded-2xl ${theme.textSecondary} hover:text-white ${theme.buttonHover} transition-all`} title="Import Backup">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
             </button>
-            <button onClick={handleExport} className={`p-3 ${theme.buttonBg} rounded-2xl ${theme.textSecondary} hover:text-white ${theme.buttonHover} transition-all`}>
+            <button onClick={handleExport} className={`p-3 ${theme.buttonBg} rounded-2xl ${theme.textSecondary} hover:text-white ${theme.buttonHover} transition-all`} title="Export Data">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
             </button>
             <button onClick={handleReset} className={`p-3 ${theme.buttonBg} rounded-2xl ${theme.textSecondary} hover:text-red-500 hover:bg-red-900/10 transition-all`}>
@@ -311,7 +405,7 @@ const App: React.FC = () => {
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-10">
         <div className={view === 'add' ? 'max-w-4xl mx-auto' : ''}>
-          {view === 'list' && <GameList games={games.filter(g => g.team === activeTeam)} onEdit={handleEdit} onDelete={handleDelete} activeTeam={activeTeam} />}
+          {view === 'list' && <GameList games={games.filter(g => g.team === activeTeam)} onEdit={handleEdit} onDelete={handleDelete} activeTeam={activeTeam} appSettings={appSettings} />}
           {view === 'stats' && <StatsDashboard games={games.filter(g => g.team === activeTeam)} />}
           {view === 'add' && (
             <GameForm
@@ -326,6 +420,15 @@ const App: React.FC = () => {
       </main>
 
       {showSyncSettings && <SyncSettings onClose={() => setShowSyncSettings(false)} />}
+
+      {showTeamManager && (
+        <TeamCompetitionManager
+          settings={appSettings}
+          onSave={handleSaveSettings}
+          onClose={() => setShowTeamManager(false)}
+          activeTeam={activeTeam}
+        />
+      )}
 
       {view !== 'add' && (
         <button

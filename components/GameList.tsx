@@ -1,15 +1,25 @@
 
 import React, { useState, useMemo } from 'react';
-import { GameEntry, SortField } from '../types';
+import { GameEntry, SortField, AppSettings } from '../types';
+
+// Default placeholder logo (simple basketball icon as SVG data URI)
+const PLACEHOLDER_LOGO = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM2NjY2NjYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIvPjxwYXRoIGQ9Ik0xMiAydjIwIi8+PHBhdGggZD0iTTIgMTJoMjAiLz48cGF0aCBkPSJNMTIgMmE4IDggMCAwIDAgOCA4Ii8+PHBhdGggZD0iTTEyIDIyYTggOCAwIDAgMCA4LTgiLz48cGF0aCBkPSJNMTIgMmE4IDggMCAwIDEtOCA4Ii8+PHBhdGggZD0iTTEyIDIyYTggOCAwIDAgMS04LTgiLz48L3N2Zz4=';
 
 interface GameListProps {
   games: GameEntry[];
   onEdit: (game: GameEntry) => void;
   onDelete: (id: string) => void;
   activeTeam?: 'Partizan' | 'Reprezentacija';
+  appSettings?: AppSettings;
 }
 
-export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, activeTeam = 'Partizan' }) => {
+export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, activeTeam = 'Partizan', appSettings }) => {
+  // Helper to get team logo by name
+  const getTeamLogo = (teamName: string): string => {
+    if (!appSettings) return PLACEHOLDER_LOGO;
+    const team = appSettings.teams.find(t => t.name.toLowerCase() === teamName.toLowerCase());
+    return team?.logo || PLACEHOLDER_LOGO;
+  };
   // Team-based FULL page theming
   // Partizan Belgrade: Black & White classic colors
   // Serbia National Team: Blue & White national colors
@@ -367,15 +377,23 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
                   {game.isDnp && <span className="text-xs font-black bg-red-900/40 text-red-400 px-4 py-2 rounded-xl uppercase tracking-widest">DNP</span>}
                 </div>
 
-                <div className="flex-1 min-w-0">
-                  <h4 className={`font-black text-4xl ${colors.primaryText} truncate oswald tracking-tight transition-colors`}>
-                    {game.isHome ? 'vs ' : '@ '}{game.opponent}
-                  </h4>
-                  <div className="flex items-center gap-4 mt-3">
-                    <span className={`text-3xl font-black oswald ${game.result === 'W' ? 'text-emerald-500' : 'text-red-500'}`}>
-                      {game.result} {game.finalScore}
-                    </span>
-                    <span className={`${colors.mutedText} text-sm font-black tracking-widest`}>({game.seasonRecord})</span>
+                <div className="flex items-center gap-5">
+                  {/* Opponent Logo */}
+                  <img
+                    src={getTeamLogo(game.opponent)}
+                    alt={game.opponent}
+                    className="w-16 h-16 rounded-xl object-cover bg-black/30 flex-shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h4 className={`font-black text-4xl ${colors.primaryText} truncate oswald tracking-tight transition-colors`}>
+                      {game.isHome ? 'vs ' : '@ '}{game.opponent}
+                    </h4>
+                    <div className="flex items-center gap-4 mt-3">
+                      <span className={`text-3xl font-black oswald ${game.result === 'W' ? 'text-emerald-500' : 'text-red-500'}`}>
+                        {game.result} {game.finalScore}
+                      </span>
+                      <span className={`${colors.mutedText} text-sm font-black tracking-widest`}>({game.seasonRecord})</span>
+                    </div>
                   </div>
                 </div>
 
@@ -543,6 +561,13 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
                 <span className={`text-xs font-black ${colors.statsBg} ${colors.secondaryText} px-2.5 py-1 rounded-lg uppercase tracking-widest group-hover:opacity-80 transition-all`}>{game.competition}</span>
                 <span className={`text-xs ${colors.mutedText} font-black uppercase tracking-tighter`}>{game.date}</span>
               </div>
+
+              {/* Opponent Logo */}
+              <img
+                src={getTeamLogo(game.opponent)}
+                alt={game.opponent}
+                className="w-10 h-10 rounded-lg object-cover bg-black/30 flex-shrink-0"
+              />
 
               {/* Center: Opponent & Score */}
               <div className="flex-1 min-w-0">
