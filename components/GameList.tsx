@@ -20,6 +20,13 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
     const team = appSettings.teams.find(t => t.name.toLowerCase() === teamName.toLowerCase());
     return team?.logo || PLACEHOLDER_LOGO;
   };
+
+  // Helper to get competition logo by name
+  const getCompetitionLogo = (compName: string): string => {
+    if (!appSettings) return PLACEHOLDER_LOGO;
+    const comp = appSettings.competitions.find(c => c.name.toLowerCase() === compName.toLowerCase());
+    return comp?.logo || PLACEHOLDER_LOGO;
+  };
   // Team-based FULL page theming
   // Partizan Belgrade: Black & White classic colors
   // Serbia National Team: Blue & White national colors
@@ -369,8 +376,16 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
             >
               <div className="p-8">
                 <div className="flex justify-between items-start mb-6">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className={`text-xs font-black ${colors.statsBg} ${colors.secondaryText} px-4 py-2 rounded-xl uppercase tracking-widest group-hover:opacity-80 transition-all`}>{game.competition}</span>
+                  <div className="flex flex-wrap items-center gap-3">
+                    {/* Competition Logo */}
+                    <div className="flex items-center gap-2">
+                      <img
+                        src={getCompetitionLogo(game.competition)}
+                        alt={game.competition}
+                        className="w-6 h-6 object-contain flex-shrink-0"
+                      />
+                      <span className={`text-xs font-black ${colors.statsBg} ${colors.secondaryText} px-3 py-1.5 rounded-xl uppercase tracking-widest group-hover:opacity-80 transition-all`}>{game.competition}</span>
+                    </div>
                     <span className={`text-sm ${colors.mutedText} font-black uppercase tracking-tighter`}>{game.date}</span>
                     {game.isOvertime && <span className="text-xs font-black bg-amber-900/40 text-amber-400 px-3 py-1.5 rounded-xl uppercase tracking-widest">OT</span>}
                   </div>
@@ -378,11 +393,11 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
                 </div>
 
                 <div className="flex items-center gap-5">
-                  {/* Opponent Logo */}
+                  {/* Opponent Logo - bigger, no background */}
                   <img
                     src={getTeamLogo(game.opponent)}
                     alt={game.opponent}
-                    className="w-16 h-16 rounded-xl object-cover bg-black/30 flex-shrink-0"
+                    className="w-20 h-20 object-contain flex-shrink-0"
                   />
                   <div className="flex-1 min-w-0">
                     <h4 className={`font-black text-4xl ${colors.primaryText} truncate oswald tracking-tight transition-colors`}>
@@ -556,17 +571,24 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
             className={`${colors.cardBg} rounded-2xl border-2 ${colors.cardBorder} shadow-xl group ${colors.cardHoverBorder} transition-all duration-300 ${game.isDnp ? 'opacity-60' : ''}`}
           >
             <div className="p-5 flex items-center gap-4">
-              {/* Left: Date & Competition */}
-              <div className="flex flex-col items-start gap-1.5 min-w-[120px]">
-                <span className={`text-xs font-black ${colors.statsBg} ${colors.secondaryText} px-2.5 py-1 rounded-lg uppercase tracking-widest group-hover:opacity-80 transition-all`}>{game.competition}</span>
+              {/* Left: Date & Competition with logo */}
+              <div className="flex flex-col items-start gap-1.5 min-w-[130px]">
+                <div className="flex items-center gap-2">
+                  <img
+                    src={getCompetitionLogo(game.competition)}
+                    alt={game.competition}
+                    className="w-5 h-5 object-contain flex-shrink-0"
+                  />
+                  <span className={`text-xs font-black ${colors.statsBg} ${colors.secondaryText} px-2 py-1 rounded-lg uppercase tracking-widest group-hover:opacity-80 transition-all`}>{game.competition}</span>
+                </div>
                 <span className={`text-xs ${colors.mutedText} font-black uppercase tracking-tighter`}>{game.date}</span>
               </div>
 
-              {/* Opponent Logo */}
+              {/* Opponent Logo - bigger, no background */}
               <img
                 src={getTeamLogo(game.opponent)}
                 alt={game.opponent}
-                className="w-10 h-10 rounded-lg object-cover bg-black/30 flex-shrink-0"
+                className="w-14 h-14 object-contain flex-shrink-0"
               />
 
               {/* Center: Opponent & Score */}

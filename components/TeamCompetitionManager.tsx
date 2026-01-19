@@ -228,7 +228,7 @@ export const TeamCompetitionManager: React.FC<TeamCompetitionManagerProps> = ({
                     key={team.id}
                     className={`flex items-center gap-4 p-4 ${theme.inputBg} rounded-2xl border ${theme.inputBorder}`}
                   >
-                    {/* Logo */}
+                    {/* Logo - bigger, no background for transparent PNGs */}
                     <button
                       onClick={() => triggerUpload('team', team.id)}
                       className="relative group"
@@ -236,7 +236,7 @@ export const TeamCompetitionManager: React.FC<TeamCompetitionManagerProps> = ({
                       <img
                         src={team.logo || PLACEHOLDER_LOGO}
                         alt={team.name}
-                        className="w-12 h-12 rounded-xl object-cover bg-black/20"
+                        className="w-16 h-16 rounded-xl object-contain"
                       />
                       <div className="absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
                         <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -339,7 +339,7 @@ export const TeamCompetitionManager: React.FC<TeamCompetitionManagerProps> = ({
                     key={comp.id}
                     className={`flex items-center gap-4 p-4 ${theme.inputBg} rounded-2xl border ${theme.inputBorder}`}
                   >
-                    {/* Logo */}
+                    {/* Logo - bigger, no background for transparent PNGs */}
                     <button
                       onClick={() => triggerUpload('competition', comp.id)}
                       className="relative group"
@@ -347,7 +347,7 @@ export const TeamCompetitionManager: React.FC<TeamCompetitionManagerProps> = ({
                       <img
                         src={comp.logo || PLACEHOLDER_LOGO}
                         alt={comp.name}
-                        className="w-12 h-12 rounded-xl object-cover bg-black/20"
+                        className="w-16 h-16 rounded-xl object-contain"
                       />
                       <div className="absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
                         <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
