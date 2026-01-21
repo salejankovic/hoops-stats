@@ -48,7 +48,13 @@ const App: React.FC = () => {
   // Auto-sync teams/competitions from games to settings
   // IMPORTANT: Only run ONCE per session after initial load, not on every page refresh
   useEffect(() => {
+    console.log('[AutoSync] Effect triggered - games:', games.length, 'settingsLoaded:', appSettingsLoaded, 'alreadySynced:', hasInitialSyncedRef.current);
+
     if (games.length > 0 && appSettingsLoaded && !hasInitialSyncedRef.current) {
+      console.log('[AutoSync] Running auto-sync');
+      const teamsWithLogos = appSettings.teams.filter(t => !!t.logo).length;
+      console.log('[AutoSync] Current settings:', appSettings.teams.length, 'teams,', teamsWithLogos, 'with logos');
+
       hasInitialSyncedRef.current = true; // Mark as synced to prevent future runs
 
       const existingTeamNames = new Set(appSettings.teams.map(t => t.name.toLowerCase()));
@@ -80,12 +86,15 @@ const App: React.FC = () => {
       });
 
       if (newTeams.length > 0 || newComps.length > 0) {
+        console.log('[AutoSync] Adding', newTeams.length, 'new teams,', newComps.length, 'new competitions');
         const updatedSettings = {
           teams: [...appSettings.teams, ...newTeams],
           competitions: [...appSettings.competitions, ...newComps]
         };
         setAppSettings(updatedSettings);
         storageService.saveAppSettings(updatedSettings);
+      } else {
+        console.log('[AutoSync] No new teams/competitions to add');
       }
     }
   }, [games, appSettingsLoaded]);

@@ -294,16 +294,21 @@ class StorageService {
     // NOTE: We don't use localStorage for app settings because base64 logos are too large
     // and cause QuotaExceededError. Settings are stored only in Supabase.
 
+    console.log('[AppSettings] Loading - client exists:', !!this.client, 'user exists:', !!this.currentUser);
+
     // Wait for session to be initialized if Supabase client exists
     if (this.client && !this.currentUser) {
+      console.log('[AppSettings] Fetching session...');
       try {
         const { data: { session } } = await this.client.auth.getSession();
+        console.log('[AppSettings] Session fetched:', !!session, 'user:', session?.user?.email);
         if (session?.user) {
           this.currentUser = {
             uid: session.user.id,
             email: session.user.email || null,
           };
           this.notifyUserListeners(this.currentUser);
+          console.log('[AppSettings] User set:', this.currentUser.email);
         }
       } catch (error) {
         console.error('[AppSettings] Error getting session:', error);
@@ -317,6 +322,7 @@ class StorageService {
     }
 
     try {
+      console.log('[AppSettings] Querying database for user:', this.currentUser.email);
       const { data, error } = await this.client
         .from('app_settings')
         .select('*')
@@ -326,6 +332,7 @@ class StorageService {
       if (error) {
         // If no settings exist yet, that's OK - return default
         if (error.code === 'PGRST116') {
+          console.log('[AppSettings] No settings found in database, returning defaults');
           return getDefaultAppSettings();
         }
         console.error('[AppSettings] Error loading from Supabase:', error);
@@ -334,10 +341,14 @@ class StorageService {
 
       if (data?.settings) {
         const settings = data.settings as AppSettings;
-        // Don't cache to localStorage - logos are too large
+        const teamsWithLogos = settings.teams.filter(t => !!t.logo).length;
+        const compsWithLogos = settings.competitions.filter(c => !!c.logo).length;
+        console.log('[AppSettings] Loaded from DB:', settings.teams.length, 'teams,', teamsWithLogos, 'with logos');
+        console.log('[AppSettings] Loaded from DB:', settings.competitions.length, 'comps,', compsWithLogos, 'with logos');
         return settings;
       }
 
+      console.log('[AppSettings] No settings data in response, returning defaults');
       return getDefaultAppSettings();
     } catch (error) {
       console.error('Error loading app settings from Supabase:', error);
@@ -350,8 +361,13 @@ class StorageService {
     // NOTE: We don't cache to localStorage because base64 logos are too large
     // and cause QuotaExceededError. Settings are stored only in Supabase.
 
+    const teamsWithLogos = settings.teams.filter(t => !!t.logo).length;
+    const compsWithLogos = settings.competitions.filter(c => !!c.logo).length;
+    console.log('[AppSettings] Saving:', settings.teams.length, 'teams,', teamsWithLogos, 'with logos,', settings.competitions.length, 'comps,', compsWithLogos, 'with logos');
+
     // Wait for session to be initialized if Supabase client exists
     if (this.client && !this.currentUser) {
+      console.log('[AppSettings] No user during save, fetching session...');
       try {
         const { data: { session } } = await this.client.auth.getSession();
         if (session?.user) {
@@ -360,6 +376,7 @@ class StorageService {
             email: session.user.email || null,
           };
           this.notifyUserListeners(this.currentUser);
+          console.log('[AppSettings] User set during save:', this.currentUser.email);
         }
       } catch (error) {
         console.error('[AppSettings] Error getting session:', error);
@@ -372,6 +389,7 @@ class StorageService {
     }
 
     try {
+      console.log('[AppSettings] Saving to database for user:', this.currentUser.email);
       const { error } = await this.client
         .from('app_settings')
         .upsert({
@@ -387,6 +405,7 @@ class StorageService {
         throw error;
       }
 
+      console.log('[AppSettings] Successfully saved to database');
       this.updateSyncTime();
     } catch (error) {
       console.error('Error saving app settings to Supabase:', error);
