@@ -291,21 +291,13 @@ class StorageService {
 
   // Load app settings (teams/competitions with logos) from Supabase
   async loadAppSettings(): Promise<AppSettings> {
-    // Get localStorage settings as fallback
-    let localSettings: AppSettings = getDefaultAppSettings();
-    const saved = localStorage.getItem(APP_SETTINGS_KEY);
-    if (saved) {
-      try {
-        localSettings = JSON.parse(saved);
-      } catch (e) {
-        console.error("Failed to parse local app settings", e);
-      }
-    }
+    // NOTE: We don't use localStorage for app settings because base64 logos are too large
+    // and cause QuotaExceededError. Settings are stored only in Supabase.
 
-    // If not connected to Supabase or no user, return local settings
+    // If not connected to Supabase or no user, return default settings
     if (!this.client || !this.currentUser) {
-      console.log('[AppSettings] No Supabase client or user, returning local settings');
-      return localSettings;
+      console.log('[AppSettings] No Supabase client or user, returning default settings');
+      return getDefaultAppSettings();
     }
 
     try {
@@ -317,10 +309,10 @@ class StorageService {
         .single();
 
       if (error) {
-        // If no settings exist yet, that's OK - return local/default
+        // If no settings exist yet, that's OK - return default
         if (error.code === 'PGRST116') {
-          console.log('[AppSettings] No settings in Supabase yet, returning local settings');
-          return localSettings;
+          console.log('[AppSettings] No settings in Supabase yet, returning default settings');
+          return getDefaultAppSettings();
         }
         console.error('[AppSettings] Supabase error:', error);
         throw error;
@@ -356,24 +348,22 @@ class StorageService {
         console.log('[AppSettings] Teams with logos:', teamsWithLogos, '/', settings.teams.length);
         console.log('[AppSettings] Competitions with logos:', compsWithLogos, '/', settings.competitions.length);
 
-        // Save to localStorage as cache
-        localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(settings));
+        // Don't cache to localStorage - logos are too large
         return settings;
       }
 
-      console.log('[AppSettings] No settings data, returning local');
-      return localSettings;
+      console.log('[AppSettings] No settings data, returning default');
+      return getDefaultAppSettings();
     } catch (error) {
       console.error('Error loading app settings from Supabase:', error);
-      return localSettings;
+      return getDefaultAppSettings();
     }
   }
 
   // Save app settings (teams/competitions with logos) to Supabase
   async saveAppSettings(settings: AppSettings): Promise<void> {
-    // Always save to localStorage first as cache
-    localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(settings));
-    console.log('[AppSettings] Saved to localStorage:', settings.teams.length, 'teams,', settings.competitions.length, 'competitions');
+    // NOTE: We don't cache to localStorage because base64 logos are too large
+    // and cause QuotaExceededError. Settings are stored only in Supabase.
 
     // Count how many have logos before saving
     const teamsWithLogos = settings.teams.filter(t => !!t.logo).length;
