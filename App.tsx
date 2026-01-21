@@ -34,7 +34,9 @@ const App: React.FC = () => {
   // Load app settings from Supabase on mount and when user changes
   useEffect(() => {
     const loadSettings = async () => {
+      console.log('[App] Loading settings, user:', user?.email || 'no user');
       const settings = await storageService.loadAppSettings();
+      console.log('[App] Settings loaded:', settings.teams.length, 'teams,', settings.competitions.length, 'competitions');
       setAppSettings(settings);
     };
     loadSettings();
