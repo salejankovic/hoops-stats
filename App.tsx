@@ -31,24 +31,26 @@ const App: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [config, setConfig] = useState<StorageConfig>(storageService.getConfig());
   const [activeTeam, setActiveTeam] = useState<'Partizan' | 'Reprezentacija'>('Partizan');
+  const hasInitialSyncedRef = useRef(false);
 
   // Load app settings from Supabase on mount and when user changes
   useEffect(() => {
     const loadSettings = async () => {
-      console.log('[App] Loading settings, user:', user?.email || 'no user');
       const settings = await storageService.loadAppSettings();
-      console.log('[App] Settings loaded:', settings.teams.length, 'teams,', settings.competitions.length, 'competitions');
       setAppSettings(settings);
       setAppSettingsLoaded(true);
     };
     setAppSettingsLoaded(false);
+    hasInitialSyncedRef.current = false; // Reset sync flag when user changes
     loadSettings();
   }, [user]);
 
   // Auto-sync teams/competitions from games to settings
-  // IMPORTANT: Only run after appSettings have loaded from Supabase
+  // IMPORTANT: Only run ONCE per session after initial load, not on every page refresh
   useEffect(() => {
-    if (games.length > 0 && appSettingsLoaded) {
+    if (games.length > 0 && appSettingsLoaded && !hasInitialSyncedRef.current) {
+      hasInitialSyncedRef.current = true; // Mark as synced to prevent future runs
+
       const existingTeamNames = new Set(appSettings.teams.map(t => t.name.toLowerCase()));
       const existingCompNames = new Set(appSettings.competitions.map(c => c.name.toLowerCase()));
 

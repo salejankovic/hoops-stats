@@ -301,7 +301,6 @@ class StorageService {
     }
 
     try {
-      console.log('[AppSettings] Loading from Supabase for user:', this.currentUser.uid);
       const { data, error } = await this.client
         .from('app_settings')
         .select('*')
@@ -311,48 +310,18 @@ class StorageService {
       if (error) {
         // If no settings exist yet, that's OK - return default
         if (error.code === 'PGRST116') {
-          console.log('[AppSettings] No settings in Supabase yet, returning default settings');
           return getDefaultAppSettings();
         }
-        console.error('[AppSettings] Supabase error:', error);
+        console.error('[AppSettings] Error loading from Supabase:', error);
         throw error;
       }
 
       if (data?.settings) {
         const settings = data.settings as AppSettings;
-        console.log('[AppSettings] Loaded from Supabase:', settings.teams.length, 'teams,', settings.competitions.length, 'competitions');
-
-        // Log detailed info about first few teams/competitions to see if logos are present
-        if (settings.teams.length > 0) {
-          const firstTeam = settings.teams[0];
-          console.log('[AppSettings] First team example:', {
-            name: firstTeam.name,
-            hasLogo: !!firstTeam.logo,
-            logoLength: firstTeam.logo?.length || 0,
-            logoPreview: firstTeam.logo?.substring(0, 50) + '...'
-          });
-        }
-        if (settings.competitions.length > 0) {
-          const firstComp = settings.competitions[0];
-          console.log('[AppSettings] First competition example:', {
-            name: firstComp.name,
-            hasLogo: !!firstComp.logo,
-            logoLength: firstComp.logo?.length || 0,
-            logoPreview: firstComp.logo?.substring(0, 50) + '...'
-          });
-        }
-
-        // Count how many teams/competitions actually have logos
-        const teamsWithLogos = settings.teams.filter(t => !!t.logo).length;
-        const compsWithLogos = settings.competitions.filter(c => !!c.logo).length;
-        console.log('[AppSettings] Teams with logos:', teamsWithLogos, '/', settings.teams.length);
-        console.log('[AppSettings] Competitions with logos:', compsWithLogos, '/', settings.competitions.length);
-
         // Don't cache to localStorage - logos are too large
         return settings;
       }
 
-      console.log('[AppSettings] No settings data, returning default');
       return getDefaultAppSettings();
     } catch (error) {
       console.error('Error loading app settings from Supabase:', error);
@@ -365,29 +334,11 @@ class StorageService {
     // NOTE: We don't cache to localStorage because base64 logos are too large
     // and cause QuotaExceededError. Settings are stored only in Supabase.
 
-    // Count how many have logos before saving
-    const teamsWithLogos = settings.teams.filter(t => !!t.logo).length;
-    const compsWithLogos = settings.competitions.filter(c => !!c.logo).length;
-    console.log('[AppSettings] About to save - Teams with logos:', teamsWithLogos, '/', settings.teams.length);
-    console.log('[AppSettings] About to save - Competitions with logos:', compsWithLogos, '/', settings.competitions.length);
-
-    if (settings.teams.length > 0 && settings.teams[0].logo) {
-      console.log('[AppSettings] First team logo preview:', settings.teams[0].name, 'logo length:', settings.teams[0].logo.length);
-    }
-
     if (!this.client || !this.currentUser) {
-      console.log('[AppSettings] No Supabase client or user, skipping cloud save');
       return;
     }
 
     try {
-      console.log('[AppSettings] Saving to Supabase for user:', this.currentUser.uid);
-
-      // Calculate approximate size of settings JSON
-      const settingsJson = JSON.stringify(settings);
-      console.log('[AppSettings] Settings JSON size:', (settingsJson.length / 1024).toFixed(2), 'KB');
-
-      // Upsert the settings (insert or update)
       const { error } = await this.client
         .from('app_settings')
         .upsert({
@@ -399,11 +350,10 @@ class StorageService {
         });
 
       if (error) {
-        console.error('[AppSettings] Supabase save error:', error);
+        console.error('[AppSettings] Error saving to Supabase:', error);
         throw error;
       }
 
-      console.log('[AppSettings] Successfully saved to Supabase');
       this.updateSyncTime();
     } catch (error) {
       console.error('Error saving app settings to Supabase:', error);

@@ -17,33 +17,19 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
   // Helper to get team logo by name
   const getTeamLogo = (teamName: string): string => {
     if (!appSettings) {
-      console.log('[GameList] No appSettings, returning placeholder for team:', teamName);
       return PLACEHOLDER_LOGO;
     }
-    console.log('[GameList] Looking for team logo:', teamName, 'in', appSettings.teams.length, 'teams');
     const team = appSettings.teams.find(t => t.name.toLowerCase() === teamName.toLowerCase());
-    if (team) {
-      console.log('[GameList] Found team:', team.name, 'has logo:', !!team.logo, 'logo length:', team.logo?.length);
-      return team.logo || PLACEHOLDER_LOGO;
-    }
-    console.log('[GameList] Team not found, returning placeholder');
-    return PLACEHOLDER_LOGO;
+    return team?.logo || PLACEHOLDER_LOGO;
   };
 
   // Helper to get competition logo by name
   const getCompetitionLogo = (compName: string): string => {
     if (!appSettings) {
-      console.log('[GameList] No appSettings, returning placeholder for competition:', compName);
       return PLACEHOLDER_LOGO;
     }
-    console.log('[GameList] Looking for competition logo:', compName, 'in', appSettings.competitions.length, 'competitions');
     const comp = appSettings.competitions.find(c => c.name.toLowerCase() === compName.toLowerCase());
-    if (comp) {
-      console.log('[GameList] Found competition:', comp.name, 'has logo:', !!comp.logo, 'logo length:', comp.logo?.length);
-      return comp.logo || PLACEHOLDER_LOGO;
-    }
-    console.log('[GameList] Competition not found, returning placeholder');
-    return PLACEHOLDER_LOGO;
+    return comp?.logo || PLACEHOLDER_LOGO;
   };
   // Team-based FULL page theming
   // Partizan Belgrade: Black & White classic colors
