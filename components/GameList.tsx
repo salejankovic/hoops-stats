@@ -422,6 +422,12 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
                   </div>
                 )}
 
+                {game.stats.fouls === 5 && (
+                  <div className={`mt-5 flex items-center justify-center py-3 bg-red-900/40 border border-red-500/30 rounded-xl`}>
+                    <span className={`text-xs font-black text-red-400 uppercase tracking-[0.3em]`}>FOULED OUT 🚫</span>
+                  </div>
+                )}
+
                 {game.isDnp && (
                   <div className={`mt-6 p-5 ${colors.statsBg} rounded-2xl border ${colors.cardBorder}`}>
                     <p className={`text-sm font-black ${colors.mutedText} uppercase tracking-widest mb-2`}>DNP REASON</p>
@@ -604,6 +610,7 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
                   {game.isDnp && <span className="text-xs font-black bg-red-900/40 text-red-400 px-2 py-1 rounded-lg uppercase tracking-widest">DNP</span>}
                   {game.isGameWinner && <span className={`text-xs font-black ${colors.accentBg} ${colors.accentText} px-2 py-1 rounded-lg uppercase tracking-widest animate-pulse`}>🎯 WINNER</span>}
                   {game.isOvertime && <span className="text-xs font-black bg-amber-900/40 text-amber-400 px-2 py-1 rounded-lg uppercase tracking-widest">OT</span>}
+                  {game.stats.fouls === 5 && <span className="text-xs font-black bg-red-900/40 text-red-400 px-2 py-1 rounded-lg uppercase tracking-widest">🚫 FOULED OUT</span>}
                 </div>
                 <div className="flex items-center gap-2 mt-1">
                   <span className={`text-lg font-black oswald ${game.result === 'W' ? 'text-emerald-500' : 'text-red-500'}`}>
