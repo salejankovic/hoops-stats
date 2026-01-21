@@ -294,6 +294,22 @@ class StorageService {
     // NOTE: We don't use localStorage for app settings because base64 logos are too large
     // and cause QuotaExceededError. Settings are stored only in Supabase.
 
+    // Wait for session to be initialized if Supabase client exists
+    if (this.client && !this.currentUser) {
+      try {
+        const { data: { session } } = await this.client.auth.getSession();
+        if (session?.user) {
+          this.currentUser = {
+            uid: session.user.id,
+            email: session.user.email || null,
+          };
+          this.notifyUserListeners(this.currentUser);
+        }
+      } catch (error) {
+        console.error('[AppSettings] Error getting session:', error);
+      }
+    }
+
     // If not connected to Supabase or no user, return default settings
     if (!this.client || !this.currentUser) {
       console.log('[AppSettings] No Supabase client or user, returning default settings');
@@ -334,7 +350,24 @@ class StorageService {
     // NOTE: We don't cache to localStorage because base64 logos are too large
     // and cause QuotaExceededError. Settings are stored only in Supabase.
 
+    // Wait for session to be initialized if Supabase client exists
+    if (this.client && !this.currentUser) {
+      try {
+        const { data: { session } } = await this.client.auth.getSession();
+        if (session?.user) {
+          this.currentUser = {
+            uid: session.user.id,
+            email: session.user.email || null,
+          };
+          this.notifyUserListeners(this.currentUser);
+        }
+      } catch (error) {
+        console.error('[AppSettings] Error getting session:', error);
+      }
+    }
+
     if (!this.client || !this.currentUser) {
+      console.error('[AppSettings] Cannot save - no Supabase client or user');
       return;
     }
 
