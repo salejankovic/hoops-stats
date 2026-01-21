@@ -26,6 +26,7 @@ const App: React.FC = () => {
   const [showSyncSettings, setShowSyncSettings] = useState(false);
   const [showTeamManager, setShowTeamManager] = useState(false);
   const [appSettings, setAppSettings] = useState<AppSettings>(getDefaultSettings());
+  const [appSettingsLoaded, setAppSettingsLoaded] = useState(false);
   const [isAppReady, setIsAppReady] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [config, setConfig] = useState<StorageConfig>(storageService.getConfig());
@@ -38,13 +39,16 @@ const App: React.FC = () => {
       const settings = await storageService.loadAppSettings();
       console.log('[App] Settings loaded:', settings.teams.length, 'teams,', settings.competitions.length, 'competitions');
       setAppSettings(settings);
+      setAppSettingsLoaded(true);
     };
+    setAppSettingsLoaded(false);
     loadSettings();
   }, [user]);
 
   // Auto-sync teams/competitions from games to settings
+  // IMPORTANT: Only run after appSettings have loaded from Supabase
   useEffect(() => {
-    if (games.length > 0) {
+    if (games.length > 0 && appSettingsLoaded) {
       const existingTeamNames = new Set(appSettings.teams.map(t => t.name.toLowerCase()));
       const existingCompNames = new Set(appSettings.competitions.map(c => c.name.toLowerCase()));
 
@@ -82,7 +86,7 @@ const App: React.FC = () => {
         storageService.saveAppSettings(updatedSettings);
       }
     }
-  }, [games]);
+  }, [games, appSettingsLoaded]);
 
   // Handle saving settings from the manager
   const handleSaveSettings = (settings: AppSettings) => {
