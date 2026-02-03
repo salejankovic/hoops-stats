@@ -399,6 +399,9 @@ class StorageService {
         const currentTeamsWithLogos = currentSettings.teams.filter(t => !!t.logo).length;
         const currentCompsWithLogos = currentSettings.competitions.filter(c => !!c.logo).length;
 
+        console.log('[AppSettings] Save check - DB has:', currentTeamsWithLogos, 'team logos,', currentCompsWithLogos, 'comp logos');
+        console.log('[AppSettings] Save check - New has:', newTeamsWithLogos, 'team logos,', newCompsWithLogos, 'comp logos');
+
         // If we would lose logos, refuse to save (unless we're adding more logos)
         if (currentTeamsWithLogos > 0 && newTeamsWithLogos < currentTeamsWithLogos) {
           console.error('[AppSettings] BLOCKED: Would lose', currentTeamsWithLogos - newTeamsWithLogos, 'team logos. Refusing to save.');

@@ -46,7 +46,9 @@ const App: React.FC = () => {
       console.log('[App] Loading settings for user:', user.email);
       const settings = await storageService.loadAppSettings();
       const teamsWithLogos = settings.teams.filter(t => !!t.logo).length;
+      const compsWithLogos = settings.competitions.filter(c => !!c.logo).length;
       console.log('[App] Settings loaded:', settings.teams.length, 'teams,', teamsWithLogos, 'with logos');
+      console.log('[App] Settings loaded:', settings.competitions.length, 'comps,', compsWithLogos, 'with logos');
       setAppSettings(settings);
       setAppSettingsLoaded(true);
     };
@@ -66,6 +68,12 @@ const App: React.FC = () => {
 
     if (games.length > 0 && appSettingsLoaded && !hasInitialSyncedRef.current) {
       hasInitialSyncedRef.current = true; // Mark as synced to prevent future runs
+
+      // Log current state before auto-sync
+      const teamsWithLogos = appSettings.teams.filter(t => !!t.logo).length;
+      const compsWithLogos = appSettings.competitions.filter(c => !!c.logo).length;
+      console.log('[AutoSync] Before sync - teams:', appSettings.teams.length, 'with logos:', teamsWithLogos);
+      console.log('[AutoSync] Before sync - comps:', appSettings.competitions.length, 'with logos:', compsWithLogos);
 
       const existingTeamNames = new Set(appSettings.teams.map((t: TeamConfig) => t.name.toLowerCase()));
       const existingCompNames = new Set(appSettings.competitions.map((c: CompetitionConfig) => c.name.toLowerCase()));
@@ -101,8 +109,14 @@ const App: React.FC = () => {
           teams: [...appSettings.teams, ...newTeams],
           competitions: [...appSettings.competitions, ...newComps]
         };
+        const newTeamsWithLogos = updatedSettings.teams.filter(t => !!t.logo).length;
+        const newCompsWithLogos = updatedSettings.competitions.filter(c => !!c.logo).length;
+        console.log('[AutoSync] After sync - teams:', updatedSettings.teams.length, 'with logos:', newTeamsWithLogos);
+        console.log('[AutoSync] After sync - comps:', updatedSettings.competitions.length, 'with logos:', newCompsWithLogos);
         setAppSettings(updatedSettings);
         storageService.saveAppSettings(updatedSettings);
+      } else {
+        console.log('[AutoSync] No new teams/comps to add');
       }
     }
   }, [user, games, appSettingsLoaded]);
