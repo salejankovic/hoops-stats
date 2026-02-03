@@ -361,13 +361,8 @@ class StorageService {
     // NOTE: We don't cache to localStorage because base64 logos are too large
     // and cause QuotaExceededError. Settings are stored only in Supabase.
 
-    const teamsWithLogos = settings.teams.filter(t => !!t.logo).length;
-    const compsWithLogos = settings.competitions.filter(c => !!c.logo).length;
-    console.log('[AppSettings] Saving:', settings.teams.length, 'teams,', teamsWithLogos, 'with logos,', settings.competitions.length, 'comps,', compsWithLogos, 'with logos');
-
     // Wait for session to be initialized if Supabase client exists
     if (this.client && !this.currentUser) {
-      console.log('[AppSettings] No user during save, fetching session...');
       try {
         const { data: { session } } = await this.client.auth.getSession();
         if (session?.user) {
@@ -376,7 +371,6 @@ class StorageService {
             email: session.user.email || null,
           };
           this.notifyUserListeners(this.currentUser);
-          console.log('[AppSettings] User set during save:', this.currentUser.email);
         }
       } catch (error) {
         console.error('[AppSettings] Error getting session:', error);
@@ -388,8 +382,34 @@ class StorageService {
       return;
     }
 
+    // SAFEGUARD: Check current database state before saving
+    // Never overwrite if we would lose logos
+    const newTeamsWithLogos = settings.teams.filter(t => !!t.logo).length;
+    const newCompsWithLogos = settings.competitions.filter(c => !!c.logo).length;
+
     try {
-      console.log('[AppSettings] Saving to database for user:', this.currentUser.email);
+      const { data: currentData } = await this.client
+        .from('app_settings')
+        .select('settings')
+        .eq('user_id', this.currentUser.uid)
+        .single();
+
+      if (currentData?.settings) {
+        const currentSettings = currentData.settings as AppSettings;
+        const currentTeamsWithLogos = currentSettings.teams.filter(t => !!t.logo).length;
+        const currentCompsWithLogos = currentSettings.competitions.filter(c => !!c.logo).length;
+
+        // If we would lose logos, refuse to save (unless we're adding more logos)
+        if (currentTeamsWithLogos > 0 && newTeamsWithLogos < currentTeamsWithLogos) {
+          console.error('[AppSettings] BLOCKED: Would lose', currentTeamsWithLogos - newTeamsWithLogos, 'team logos. Refusing to save.');
+          return;
+        }
+        if (currentCompsWithLogos > 0 && newCompsWithLogos < currentCompsWithLogos) {
+          console.error('[AppSettings] BLOCKED: Would lose', currentCompsWithLogos - newCompsWithLogos, 'competition logos. Refusing to save.');
+          return;
+        }
+      }
+
       const { error } = await this.client
         .from('app_settings')
         .upsert({
