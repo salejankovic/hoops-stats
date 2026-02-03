@@ -429,6 +429,25 @@ class StorageService {
       }
 
       console.log('[AppSettings] Successfully saved to database');
+
+      // VERIFICATION: Read back immediately to confirm save worked
+      const { data: verifyData } = await this.client
+        .from('app_settings')
+        .select('settings')
+        .eq('user_id', this.currentUser.uid)
+        .single();
+
+      if (verifyData?.settings) {
+        const verified = verifyData.settings as AppSettings;
+        const verifiedTeamLogos = verified.teams.filter(t => !!t.logo).length;
+        const verifiedCompLogos = verified.competitions.filter(c => !!c.logo).length;
+        console.log('[AppSettings] VERIFY after save - teams:', verifiedTeamLogos, 'with logos, comps:', verifiedCompLogos, 'with logos');
+
+        if (verifiedCompLogos !== newCompsWithLogos) {
+          console.error('[AppSettings] MISMATCH! Saved', newCompsWithLogos, 'comp logos but DB has', verifiedCompLogos);
+        }
+      }
+
       this.updateSyncTime();
     } catch (error) {
       console.error('Error saving app settings to Supabase:', error);
