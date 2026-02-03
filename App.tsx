@@ -123,6 +123,15 @@ const App: React.FC = () => {
 
   // Handle saving settings from the manager
   const handleSaveSettings = (settings: AppSettings) => {
+    const teamsWithLogos = settings.teams.filter(t => !!t.logo).length;
+    const compsWithLogos = settings.competitions.filter(c => !!c.logo).length;
+    console.log('[SaveSettings] Manual save - teams:', settings.teams.length, 'with logos:', teamsWithLogos);
+    console.log('[SaveSettings] Manual save - comps:', settings.competitions.length, 'with logos:', compsWithLogos);
+    // Log first comp with logo to verify data
+    const firstCompWithLogo = settings.competitions.find(c => !!c.logo);
+    if (firstCompWithLogo) {
+      console.log('[SaveSettings] First comp with logo:', firstCompWithLogo.name, 'logo length:', firstCompWithLogo.logo?.length);
+    }
     setAppSettings(settings);
     storageService.saveAppSettings(settings);
   };
