@@ -34,9 +34,19 @@ const App: React.FC = () => {
   const hasInitialSyncedRef = useRef(false);
 
   // Load app settings from Supabase on mount and when user changes
+  // Only load when we have a confirmed user to avoid loading default settings prematurely
   useEffect(() => {
+    // Don't load settings until we have a user - prevents overwriting with defaults
+    if (!user) {
+      console.log('[App] No user yet, skipping settings load');
+      return;
+    }
+
     const loadSettings = async () => {
+      console.log('[App] Loading settings for user:', user.email);
       const settings = await storageService.loadAppSettings();
+      const teamsWithLogos = settings.teams.filter(t => !!t.logo).length;
+      console.log('[App] Settings loaded:', settings.teams.length, 'teams,', teamsWithLogos, 'with logos');
       setAppSettings(settings);
       setAppSettingsLoaded(true);
     };
@@ -47,28 +57,28 @@ const App: React.FC = () => {
 
   // Auto-sync teams/competitions from games to settings
   // IMPORTANT: Only run ONCE per session after initial load, not on every page refresh
+  // This only ADDS new teams/competitions, never overwrites existing ones
   useEffect(() => {
-    console.log('[AutoSync] Effect triggered - games:', games.length, 'settingsLoaded:', appSettingsLoaded, 'alreadySynced:', hasInitialSyncedRef.current);
+    // Don't run if no user - settings haven't loaded properly
+    if (!user) {
+      return;
+    }
 
     if (games.length > 0 && appSettingsLoaded && !hasInitialSyncedRef.current) {
-      console.log('[AutoSync] Running auto-sync');
-      const teamsWithLogos = appSettings.teams.filter(t => !!t.logo).length;
-      console.log('[AutoSync] Current settings:', appSettings.teams.length, 'teams,', teamsWithLogos, 'with logos');
-
       hasInitialSyncedRef.current = true; // Mark as synced to prevent future runs
 
-      const existingTeamNames = new Set(appSettings.teams.map(t => t.name.toLowerCase()));
-      const existingCompNames = new Set(appSettings.competitions.map(c => c.name.toLowerCase()));
+      const existingTeamNames = new Set(appSettings.teams.map((t: TeamConfig) => t.name.toLowerCase()));
+      const existingCompNames = new Set(appSettings.competitions.map((c: CompetitionConfig) => c.name.toLowerCase()));
 
       const newTeams: TeamConfig[] = [];
       const newComps: CompetitionConfig[] = [];
 
-      games.forEach(game => {
+      games.forEach((game: GameEntry) => {
         // Add opponent teams that don't exist
         if (game.opponent && !existingTeamNames.has(game.opponent.toLowerCase())) {
           existingTeamNames.add(game.opponent.toLowerCase());
           newTeams.push({
-            id: `team_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+            id: `team_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
             name: game.opponent,
             shortName: game.opponent.substring(0, 3).toUpperCase()
           });
@@ -78,7 +88,7 @@ const App: React.FC = () => {
         if (game.competition && !existingCompNames.has(game.competition.toLowerCase())) {
           existingCompNames.add(game.competition.toLowerCase());
           newComps.push({
-            id: `comp_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+            id: `comp_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
             name: game.competition,
             shortName: game.competition.substring(0, 3).toUpperCase()
           });
@@ -93,11 +103,9 @@ const App: React.FC = () => {
         };
         setAppSettings(updatedSettings);
         storageService.saveAppSettings(updatedSettings);
-      } else {
-        console.log('[AutoSync] No new teams/competitions to add');
       }
     }
-  }, [games, appSettingsLoaded]);
+  }, [user, games, appSettingsLoaded]);
 
   // Handle saving settings from the manager
   const handleSaveSettings = (settings: AppSettings) => {
