@@ -1,3 +1,13 @@
+export type TeamName = 'Partizan' | 'Reprezentacija' | 'PAOK' | 'Orlandina';
+
+// Tab order in the UI
+export const TEAM_TABS: { name: TeamName; label: string; icon: string }[] = [
+  { name: 'Partizan', label: 'PARTIZAN', icon: '⚫' },
+  { name: 'Reprezentacija', label: 'REPREZENTACIJA', icon: '🇷🇸' },
+  { name: 'PAOK', label: 'PAOK', icon: '⚫' },
+  { name: 'Orlandina', label: 'ORLANDINA', icon: '🔵' },
+];
+
 
 export type CompetitionType = string;
 
@@ -30,7 +40,7 @@ export interface GameEntry {
   seasonRecord: string;
   stats: GameStats;
   season: string;
-  team: 'Partizan' | 'Reprezentacija';
+  team: TeamName;
   isDnp?: boolean;
   dnpReason?: string;
   isGameWinner?: boolean;

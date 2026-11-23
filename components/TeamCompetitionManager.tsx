@@ -1,19 +1,19 @@
 
 import React, { useState, useRef } from 'react';
-import { TeamConfig, CompetitionConfig, AppSettings } from '../types';
+import { TeamConfig, CompetitionConfig, AppSettings, TeamName } from '../types';
 
 interface TeamCompetitionManagerProps {
   settings: AppSettings;
   onSave: (settings: AppSettings) => void;
   onClose: () => void;
-  activeTeam: 'Partizan' | 'Reprezentacija';
+  activeTeam: TeamName;
 }
 
 // Default placeholder logo (simple basketball icon as SVG data URI)
 const PLACEHOLDER_LOGO = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM2NjY2NjYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIvPjxwYXRoIGQ9Ik0xMiAydjIwIi8+PHBhdGggZD0iTTIgMTJoMjAiLz48cGF0aCBkPSJNMTIgMmE4IDggMCAwIDAgOCA4Ii8+PHBhdGggZD0iTTEyIDIyYTggOCAwIDAgMCA4LTgiLz48cGF0aCBkPSJNMTIgMmE4IDggMCAwIDEtOCA4Ii8+PHBhdGggZD0iTTEyIDIyYTggOCAwIDAgMS04LTgiLz48L3N2Zz4=';
 
 // Theme configuration
-const themes = {
+const baseThemes = {
   Partizan: {
     bg: 'bg-black',
     cardBg: 'bg-zinc-900',
@@ -47,8 +47,28 @@ const themes = {
     danger: 'bg-red-600 hover:bg-red-500 text-white',
     tabActive: 'bg-blue-500 text-white',
     tabInactive: 'bg-blue-800 text-blue-300 hover:bg-blue-700',
+  },
+  Orlandina: {
+    bg: 'bg-white',
+    cardBg: 'bg-white',
+    cardBorder: 'border-blue-200',
+    inputBg: 'bg-blue-50',
+    inputBorder: 'border-blue-200',
+    inputFocus: 'focus:border-blue-500/50',
+    text: 'text-blue-950',
+    textMuted: 'text-blue-600',
+    textLabel: 'text-blue-500',
+    accent: 'bg-blue-600 text-white',
+    accentHover: 'hover:bg-blue-500',
+    secondary: 'bg-blue-100 text-blue-700 hover:bg-blue-200',
+    danger: 'bg-red-600 hover:bg-red-500 text-white',
+    tabActive: 'bg-blue-600 text-white',
+    tabInactive: 'bg-blue-100 text-blue-600 hover:bg-blue-200',
   }
 };
+
+// PAOK shares Partizan's black & white look
+const themes: Record<TeamName, typeof baseThemes.Partizan> = { ...baseThemes, PAOK: baseThemes.Partizan };
 
 export const TeamCompetitionManager: React.FC<TeamCompetitionManagerProps> = ({
   settings,

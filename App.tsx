@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { GameEntry, SyncStatus, UserProfile, StorageConfig, AppSettings, TeamConfig, CompetitionConfig } from './types';
+import { GameEntry, SyncStatus, UserProfile, StorageConfig, AppSettings, TeamConfig, CompetitionConfig, TeamName, TEAM_TABS } from './types';
 import { GameList } from './components/GameList';
 import { GameForm } from './components/GameForm';
 import { StatsDashboard } from './components/StatsDashboard';
@@ -30,7 +30,7 @@ const App: React.FC = () => {
   const [isAppReady, setIsAppReady] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [config, setConfig] = useState<StorageConfig>(storageService.getConfig());
-  const [activeTeam, setActiveTeam] = useState<'Partizan' | 'Reprezentacija'>('Partizan');
+  const [activeTeam, setActiveTeam] = useState<TeamName>('Partizan');
   const hasInitialSyncedRef = useRef(false);
 
   // Load app settings from Supabase on mount and when user changes
@@ -285,8 +285,10 @@ const App: React.FC = () => {
   }
 
   // Team theme colors for full page styling
-  const themeColors = {
+  const darkExtras = { pageText: 'text-gray-100', hoverText: 'hover:text-white', tabActiveText: 'text-white', tabHover: 'hover:text-white/60 hover:bg-white/5' };
+  const baseThemes = {
     Partizan: {
+      ...darkExtras,
       pageBg: 'bg-black',
       headerBg: 'bg-black/90',
       headerBorder: 'border-zinc-800',
@@ -313,6 +315,7 @@ const App: React.FC = () => {
       fabShadow: 'shadow-[0_20px_40px_rgba(255,255,255,0.2)]',
     },
     Reprezentacija: {
+      ...darkExtras,
       pageBg: 'bg-blue-950',
       headerBg: 'bg-blue-950/90',
       headerBorder: 'border-blue-900',
@@ -337,13 +340,45 @@ const App: React.FC = () => {
       fabBg: 'bg-blue-500',
       fabText: 'text-white',
       fabShadow: 'shadow-[0_20px_40px_rgba(59,130,246,0.3)]',
+    },
+    Orlandina: {
+      pageBg: 'bg-white',
+      pageText: 'text-blue-950',
+      headerBg: 'bg-white/90',
+      headerBorder: 'border-blue-100',
+      tabsBg: 'bg-blue-50',
+      tabsBorder: 'border-blue-200',
+      buttonBg: 'bg-blue-50',
+      buttonHover: 'hover:bg-blue-100',
+      hoverText: 'hover:text-blue-700',
+      textPrimary: 'text-blue-900',
+      textSecondary: 'text-blue-600',
+      textMuted: 'text-blue-400',
+      accent: 'text-blue-600',
+      accentBg: 'bg-blue-600',
+      tabActive: 'bg-white',
+      tabActiveText: 'text-blue-700',
+      tabHover: 'hover:text-blue-700 hover:bg-blue-100/60',
+      tabIndicator: 'bg-blue-600',
+      badgeActive: 'bg-blue-600 text-white',
+      badgeInactive: 'bg-blue-100 text-blue-400',
+      syncDot: 'bg-blue-600 shadow-[0_0_10px_rgba(37,99,235,0.5)]',
+      syncText: 'text-blue-600',
+      navBg: 'bg-white/90',
+      navBorder: 'border-blue-200',
+      navActive: 'text-blue-600',
+      fabBg: 'bg-blue-600',
+      fabText: 'text-white',
+      fabShadow: 'shadow-[0_20px_40px_rgba(37,99,235,0.3)]',
     }
   };
+  // PAOK shares Partizan's black & white look
+  const themeColors: Record<TeamName, typeof baseThemes.Partizan> = { ...baseThemes, PAOK: baseThemes.Partizan };
 
   const theme = themeColors[activeTeam];
 
   return (
-    <div className={`min-h-screen ${theme.pageBg} flex flex-col relative overflow-x-hidden transition-colors duration-300`}>
+    <div className={`min-h-screen ${theme.pageBg} ${theme.pageText} flex flex-col relative overflow-x-hidden transition-colors duration-300`}>
       <input type="file" ref={fileInputRef} className="hidden" accept=".json" onChange={handleFileImport} />
 
       <header className={`${theme.headerBg} backdrop-blur-2xl border-b ${theme.headerBorder} sticky top-0 z-50 transition-colors duration-300`}>
@@ -366,7 +401,7 @@ const App: React.FC = () => {
                 'bg-slate-700'
               }`} />
               <div className="flex flex-col">
-                <span className={`text-[9px] font-black uppercase tracking-widest ${theme.textSecondary} group-hover:text-white leading-none`}>
+                <span className={`text-[9px] font-black uppercase tracking-widest ${theme.textSecondary} group-hover:opacity-100 leading-none`}>
                   {syncStatus === 'synced' ? 'Cloud Active' : syncStatus === 'syncing' ? 'Syncing...' : syncStatus === 'error' ? 'Sync Error' : 'Local Only'}
                 </span>
                 {lastSync && syncStatus === 'synced' && (
@@ -378,13 +413,13 @@ const App: React.FC = () => {
 
           <div className="flex gap-2">
             {/* Team & Competition Settings */}
-            <button onClick={() => setShowTeamManager(true)} className={`p-3 ${theme.buttonBg} rounded-2xl ${theme.textSecondary} hover:text-white ${theme.buttonHover} transition-all`} title="Team & Competition Settings">
+            <button onClick={() => setShowTeamManager(true)} className={`p-3 ${theme.buttonBg} rounded-2xl ${theme.textSecondary} ${theme.hoverText} ${theme.buttonHover} transition-all`} title="Team & Competition Settings">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
             </button>
-            <button onClick={() => fileInputRef.current?.click()} className={`p-3 ${theme.buttonBg} rounded-2xl ${theme.textSecondary} hover:text-white ${theme.buttonHover} transition-all`} title="Import Backup">
+            <button onClick={() => fileInputRef.current?.click()} className={`p-3 ${theme.buttonBg} rounded-2xl ${theme.textSecondary} ${theme.hoverText} ${theme.buttonHover} transition-all`} title="Import Backup">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
             </button>
-            <button onClick={handleExport} className={`p-3 ${theme.buttonBg} rounded-2xl ${theme.textSecondary} hover:text-white ${theme.buttonHover} transition-all`} title="Export Data">
+            <button onClick={handleExport} className={`p-3 ${theme.buttonBg} rounded-2xl ${theme.textSecondary} ${theme.hoverText} ${theme.buttonHover} transition-all`} title="Export Data">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
             </button>
             <button onClick={handleReset} className={`p-3 ${theme.buttonBg} rounded-2xl ${theme.textSecondary} hover:text-red-500 hover:bg-red-900/10 transition-all`}>
@@ -400,41 +435,31 @@ const App: React.FC = () => {
       {/* Team Tabs */}
       <div className={`${theme.tabsBg} border-b-2 ${theme.tabsBorder} transition-colors duration-300`}>
         <div className="max-w-7xl mx-auto w-full px-6">
-          <div className="flex gap-2">
-            <button
-              onClick={() => setActiveTeam('Partizan')}
-              className={`px-8 py-5 text-2xl font-black oswald uppercase tracking-tight transition-all relative flex items-center gap-3 ${
-                activeTeam === 'Partizan'
-                  ? `text-white ${themeColors.Partizan.tabActive}`
-                  : `${theme.textMuted} hover:text-white/60 hover:bg-white/5`
-              }`}
-            >
-              <span className="text-2xl">⚫</span>
-              <span>PARTIZAN</span>
-              <span className={`text-sm px-2.5 py-1 rounded-full font-bold ${activeTeam === 'Partizan' ? themeColors.Partizan.badgeActive : theme.badgeInactive}`}>
-                {games.filter((g: GameEntry) => g.team === 'Partizan').length}
-              </span>
-              {activeTeam === 'Partizan' && (
-                <div className={`absolute bottom-0 left-0 right-0 h-1 ${themeColors.Partizan.tabIndicator}`} />
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTeam('Reprezentacija')}
-              className={`px-8 py-5 text-2xl font-black oswald uppercase tracking-tight transition-all relative flex items-center gap-3 ${
-                activeTeam === 'Reprezentacija'
-                  ? `text-white ${themeColors.Reprezentacija.tabActive}`
-                  : `${theme.textMuted} hover:text-white/60 hover:bg-white/5`
-              }`}
-            >
-              <span className="text-2xl">🇷🇸</span>
-              <span>REPREZENTACIJA</span>
-              <span className={`text-sm px-2.5 py-1 rounded-full font-bold ${activeTeam === 'Reprezentacija' ? themeColors.Reprezentacija.badgeActive : theme.badgeInactive}`}>
-                {games.filter((g: GameEntry) => g.team === 'Reprezentacija').length}
-              </span>
-              {activeTeam === 'Reprezentacija' && (
-                <div className={`absolute bottom-0 left-0 right-0 h-1 ${themeColors.Reprezentacija.tabIndicator}`} />
-              )}
-            </button>
+          <div className="flex gap-2 overflow-x-auto">
+            {TEAM_TABS.map(tab => {
+              const isActive = activeTeam === tab.name;
+              const tabTheme = themeColors[tab.name];
+              return (
+                <button
+                  key={tab.name}
+                  onClick={() => setActiveTeam(tab.name)}
+                  className={`px-8 py-5 text-2xl font-black oswald uppercase tracking-tight transition-all relative flex items-center gap-3 whitespace-nowrap ${
+                    isActive
+                      ? `${tabTheme.tabActiveText} ${tabTheme.tabActive}`
+                      : `${theme.textMuted} ${theme.tabHover}`
+                  }`}
+                >
+                  <span className="text-2xl">{tab.icon}</span>
+                  <span>{tab.label}</span>
+                  <span className={`text-sm px-2.5 py-1 rounded-full font-bold ${isActive ? tabTheme.badgeActive : theme.badgeInactive}`}>
+                    {games.filter((g: GameEntry) => g.team === tab.name).length}
+                  </span>
+                  {isActive && (
+                    <div className={`absolute bottom-0 left-0 right-0 h-1 ${tabTheme.tabIndicator}`} />
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -477,15 +502,15 @@ const App: React.FC = () => {
 
       <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-sm">
         <div className={`${theme.navBg} backdrop-blur-2xl border ${theme.navBorder} rounded-[32px] shadow-2xl px-10 py-5 flex justify-between items-center transition-colors duration-300`}>
-          <button onClick={() => setView('list')} className={`flex flex-col items-center gap-2 transition-all ${view === 'list' ? `${theme.navActive} scale-110` : `${theme.textSecondary} hover:text-white`}`}>
+          <button onClick={() => setView('list')} className={`flex flex-col items-center gap-2 transition-all ${view === 'list' ? `${theme.navActive} scale-110` : `${theme.textSecondary} ${theme.hoverText}`}`}>
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
             <span className="text-xs font-black uppercase tracking-widest">History</span>
           </button>
-          <button onClick={() => setView('stats')} className={`flex flex-col items-center gap-2 transition-all ${view === 'stats' ? `${theme.navActive} scale-110` : `${theme.textSecondary} hover:text-white`}`}>
+          <button onClick={() => setView('stats')} className={`flex flex-col items-center gap-2 transition-all ${view === 'stats' ? `${theme.navActive} scale-110` : `${theme.textSecondary} ${theme.hoverText}`}`}>
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
             <span className="text-xs font-black uppercase tracking-widest">Insights</span>
           </button>
-          <button onClick={() => setShowSyncSettings(true)} className={`flex flex-col items-center gap-2 transition-all ${showSyncSettings ? `${theme.navActive} scale-110` : `${theme.textSecondary} hover:text-white`}`}>
+          <button onClick={() => setShowSyncSettings(true)} className={`flex flex-col items-center gap-2 transition-all ${showSyncSettings ? `${theme.navActive} scale-110` : `${theme.textSecondary} ${theme.hoverText}`}`}>
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
             <span className="text-xs font-black uppercase tracking-widest">Storage</span>
           </button>

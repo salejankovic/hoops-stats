@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useRef } from 'react';
-import { GameEntry, GameStats } from '../types';
+import { GameEntry, GameStats, TeamName } from '../types';
 import { parseRawGameText } from '../utils/parser';
 import { aiService } from '../services/ai';
 
@@ -9,11 +9,11 @@ interface GameFormProps {
   onCancel: () => void;
   initialData?: GameEntry | null;
   existingGames?: GameEntry[];
-  activeTeam?: 'Partizan' | 'Reprezentacija';
+  activeTeam?: TeamName;
 }
 
 // Theme configuration for form styling
-const formThemes = {
+const baseFormThemes = {
   Partizan: {
     // Core colors - pure black and white
     pageBg: 'bg-black/90',
@@ -48,6 +48,11 @@ const formThemes = {
     tabInactive: 'text-zinc-500 bg-zinc-900/50 hover:bg-zinc-800',
     // Special colors - keep consistent
     addNewText: 'text-white',
+    onAccentText: 'text-black',
+    deepInputBg: 'bg-black',
+    inputText: 'text-white',
+    headingText: 'text-white',
+    pirGradient: 'from-indigo-950/50 to-purple-950/30',
   },
   Reprezentacija: {
     // Core colors - Serbian blue and white
@@ -83,8 +88,56 @@ const formThemes = {
     tabInactive: 'text-blue-400/60 bg-blue-900/50 hover:bg-blue-800',
     // Special colors - keep consistent
     addNewText: 'text-blue-400',
+    onAccentText: 'text-white',
+    deepInputBg: 'bg-blue-950',
+    inputText: 'text-white',
+    headingText: 'text-white',
+    pirGradient: 'from-indigo-900/30 to-purple-900/20',
+  },
+  Orlandina: {
+    // Core colors - white with blue (inverse of Reprezentacija)
+    pageBg: 'bg-white/90',
+    cardBg: 'bg-blue-50',
+    cardBorder: 'border-blue-200',
+    inputBg: 'bg-white text-blue-950',
+    inputBorder: 'border-blue-200',
+    inputFocus: 'focus:ring-blue-500/20 focus:border-blue-500/60',
+    inputHover: 'hover:border-blue-400',
+    dropdownBg: 'bg-white',
+    dropdownHover: 'hover:bg-blue-50',
+    dropdownBorder: 'border-blue-200',
+    // Text colors
+    labelText: 'text-blue-600',
+    labelDisabled: 'text-blue-200',
+    mutedText: 'text-blue-400',
+    placeholderText: 'placeholder-blue-300',
+    // Accent colors
+    accent: 'bg-blue-600',
+    accentText: 'text-blue-600',
+    accentBorder: 'border-blue-600',
+    accentHover: 'hover:bg-blue-500',
+    accentFocus: 'focus:border-blue-600',
+    // Section headers
+    sectionAccent: 'text-blue-700',
+    sectionGradient: 'from-blue-600/50',
+    // Buttons
+    primaryBtn: 'bg-blue-600 text-white hover:bg-blue-500',
+    primaryBtnShadow: 'shadow-blue-600/20',
+    secondaryBtn: 'bg-white border-blue-200 text-blue-600 hover:text-blue-800 hover:bg-blue-50',
+    tabActive: 'bg-blue-600 text-white shadow-xl shadow-blue-600/20',
+    tabInactive: 'text-blue-500 bg-blue-50 hover:bg-blue-100',
+    // Special colors - keep consistent
+    addNewText: 'text-blue-600',
+    onAccentText: 'text-white',
+    deepInputBg: 'bg-white',
+    inputText: 'text-blue-950',
+    headingText: 'text-blue-950',
+    pirGradient: 'from-indigo-50 to-purple-50',
   }
 };
+
+// PAOK shares Partizan's black & white look
+const formThemes: Record<TeamName, typeof baseFormThemes.Partizan> = { ...baseFormThemes, PAOK: baseFormThemes.Partizan };
 
 // Themed InputField component
 const InputField: React.FC<{
@@ -338,7 +391,7 @@ export const GameForm: React.FC<GameFormProps> = ({ onSave, onCancel, initialDat
                <button
                  onClick={startVoiceEntry}
                  disabled={aiLoading}
-                 className={`w-24 h-24 rounded-full flex items-center justify-center ${theme.accent} ${activeTeam === 'Partizan' ? 'text-black' : 'text-white'} shadow-2xl transition-all active:scale-90 ${aiLoading ? 'opacity-50' : 'hover:scale-105'}`}
+                 className={`w-24 h-24 rounded-full flex items-center justify-center ${theme.accent} ${theme.onAccentText} shadow-2xl transition-all active:scale-90 ${aiLoading ? 'opacity-50' : 'hover:scale-105'}`}
                >
                  {aiLoading ? (
                    <svg className="w-10 h-10 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
@@ -348,7 +401,7 @@ export const GameForm: React.FC<GameFormProps> = ({ onSave, onCancel, initialDat
                </button>
             </div>
             <div className="space-y-3">
-              <h3 className="text-2xl font-black oswald tracking-tight text-white uppercase">{isRecording ? 'Listening...' : 'Voice Entry'}</h3>
+              <h3 className={`text-2xl font-black oswald tracking-tight ${theme.headingText} uppercase`}>{isRecording ? 'Listening...' : 'Voice Entry'}</h3>
               <p className={`text-sm ${theme.mutedText} font-medium leading-relaxed`}>
                 Describe your game: "I played 25 minutes against Real Madrid, scored 15 points with 3 triples, 5 rebounds and 2 steals. We won 88 to 82."
               </p>
@@ -471,7 +524,7 @@ export const GameForm: React.FC<GameFormProps> = ({ onSave, onCancel, initialDat
                 >
                   <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${basic.isGameWinner ? `${theme.accent} ${theme.accentBorder}` : theme.inputBorder}`}>
                     {basic.isGameWinner && (
-                      <svg className={`w-4 h-4 ${activeTeam === 'Partizan' ? 'text-black' : 'text-white'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className={`w-4 h-4 ${theme.onAccentText}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     )}
@@ -518,16 +571,16 @@ export const GameForm: React.FC<GameFormProps> = ({ onSave, onCancel, initialDat
                 <div key={shooting.label} className={`${theme.inputBg} p-6 rounded-3xl border-2 ${theme.inputBorder} space-y-4`}>
                   <p className={`text-xs font-black ${theme.labelText} uppercase tracking-widest text-center`}>{shooting.label} (M/A)</p>
                   <div className="flex items-center gap-4">
-                    <input disabled={basic.isDnp} type="number" placeholder="0" className={`w-full ${activeTeam === 'Partizan' ? 'bg-black' : 'bg-blue-950'} border-2 ${theme.inputBorder} rounded-2xl p-5 text-center text-2xl font-bold outline-none ${theme.accentFocus} transition-all text-white ${theme.placeholderText}`} value={(stats as any)[shooting.fieldM]} onChange={(e) => handleStatChange(shooting.fieldM as any, e.target.value)} />
+                    <input disabled={basic.isDnp} type="number" placeholder="0" className={`w-full ${theme.deepInputBg} border-2 ${theme.inputBorder} rounded-2xl p-5 text-center text-2xl font-bold outline-none ${theme.accentFocus} transition-all ${theme.inputText} ${theme.placeholderText}`} value={(stats as any)[shooting.fieldM]} onChange={(e) => handleStatChange(shooting.fieldM as any, e.target.value)} />
                     <span className={`${theme.mutedText} font-bold text-3xl`}>/</span>
-                    <input disabled={basic.isDnp} type="number" placeholder="0" className={`w-full ${activeTeam === 'Partizan' ? 'bg-black' : 'bg-blue-950'} border-2 ${theme.inputBorder} rounded-2xl p-5 text-center text-2xl font-bold outline-none ${theme.accentFocus} transition-all text-white ${theme.placeholderText}`} value={(stats as any)[shooting.fieldA]} onChange={(e) => handleStatChange(shooting.fieldA as any, e.target.value)} />
+                    <input disabled={basic.isDnp} type="number" placeholder="0" className={`w-full ${theme.deepInputBg} border-2 ${theme.inputBorder} rounded-2xl p-5 text-center text-2xl font-bold outline-none ${theme.accentFocus} transition-all ${theme.inputText} ${theme.placeholderText}`} value={(stats as any)[shooting.fieldA]} onChange={(e) => handleStatChange(shooting.fieldA as any, e.target.value)} />
                   </div>
                 </div>
               ))}
             </div>
 
             {/* PIR INDEX with Auto-Calculate */}
-            <div className={`bg-gradient-to-br ${activeTeam === 'Partizan' ? 'from-indigo-950/50 to-purple-950/30' : 'from-indigo-900/30 to-purple-900/20'} p-8 rounded-3xl border-2 border-indigo-500/30 space-y-6`}>
+            <div className={`bg-gradient-to-br ${theme.pirGradient} p-8 rounded-3xl border-2 border-indigo-500/30 space-y-6`}>
               <div className="flex items-center justify-between">
                 <p className="text-sm font-black text-indigo-400 uppercase tracking-widest">PIR Index</p>
                 <button
@@ -543,7 +596,7 @@ export const GameForm: React.FC<GameFormProps> = ({ onSave, onCancel, initialDat
                 disabled={basic.isDnp}
                 type="number"
                 placeholder="0"
-                className={`w-full ${activeTeam === 'Partizan' ? 'bg-black' : 'bg-blue-950'} border-2 border-indigo-600/40 rounded-2xl p-6 text-center text-4xl font-black text-indigo-400 outline-none focus:border-indigo-500 transition-all ${theme.placeholderText}`}
+                className={`w-full ${theme.deepInputBg} border-2 border-indigo-600/40 rounded-2xl p-6 text-center text-4xl font-black text-indigo-400 outline-none focus:border-indigo-500 transition-all ${theme.placeholderText}`}
                 value={stats.indexRating}
                 onChange={(e) => handleStatChange('indexRating', e.target.value)}
               />

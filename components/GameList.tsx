@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { GameEntry, SortField, AppSettings } from '../types';
+import { GameEntry, SortField, AppSettings, TeamName } from '../types';
 
 // Default placeholder logo (simple basketball icon as SVG data URI)
 const PLACEHOLDER_LOGO = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM2NjY2NjYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIvPjxwYXRoIGQ9Ik0xMiAydjIwIi8+PHBhdGggZD0iTTIgMTJoMjAiLz48cGF0aCBkPSJNMTIgMmE4IDggMCAwIDAgOCA4Ii8+PHBhdGggZD0iTTEyIDIyYTggOCAwIDAgMCA4LTgiLz48cGF0aCBkPSJNMTIgMmE4IDggMCAwIDEtOCA4Ii8+PHBhdGggZD0iTTEyIDIyYTggOCAwIDAgMS04LTgiLz48L3N2Zz4=';
@@ -9,7 +9,7 @@ interface GameListProps {
   games: GameEntry[];
   onEdit: (game: GameEntry) => void;
   onDelete: (id: string) => void;
-  activeTeam?: 'Partizan' | 'Reprezentacija';
+  activeTeam?: TeamName;
   appSettings?: AppSettings;
 }
 
@@ -34,7 +34,7 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
   // Team-based FULL page theming
   // Partizan Belgrade: Black & White classic colors
   // Serbia National Team: Blue & White national colors
-  const teamColors = {
+  const baseTeamColors = {
     Partizan: {
       // Core colors - pure black and white
       pageBg: 'bg-black',
@@ -86,8 +86,36 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
       shadowColor: 'shadow-blue-500/20',
       tabActive: 'border-blue-400',
       tabBadgeActive: 'bg-blue-500/30 text-blue-200',
+    },
+    Orlandina: {
+      // Core colors - white with blue (inverse of Reprezentacija)
+      pageBg: 'bg-white',
+      cardBg: 'bg-blue-50',
+      cardBorder: 'border-blue-200',
+      cardHoverBorder: 'hover:border-blue-500/50',
+      statsBg: 'bg-white',
+      // Accent - strong blue
+      accent: 'bg-blue-600',
+      accentText: 'text-blue-600',
+      accentBg: 'bg-blue-600/10',
+      accentBorder: 'border-blue-500/40',
+      // Text colors
+      primaryText: 'text-blue-950',
+      secondaryText: 'text-blue-700',
+      mutedText: 'text-blue-400',
+      // Interactive elements
+      buttonBg: 'bg-blue-600',
+      buttonText: 'text-white',
+      inputBorder: 'border-blue-200',
+      inputFocus: 'focus:ring-blue-500/30 focus:border-blue-500/50',
+      // Shadows and highlights
+      shadowColor: 'shadow-blue-600/20',
+      tabActive: 'border-blue-600',
+      tabBadgeActive: 'bg-blue-600 text-white',
     }
   };
+  // PAOK shares Partizan's black & white look
+  const teamColors: Record<TeamName, typeof baseTeamColors.Partizan> = { ...baseTeamColors, PAOK: baseTeamColors.Partizan };
   const colors = teamColors[activeTeam];
   const [activeSeason, setActiveSeason] = useState<string>('All seasons');
   const [filterComp, setFilterComp] = useState<string>('All');
