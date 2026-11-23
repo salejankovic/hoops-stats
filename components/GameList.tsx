@@ -280,12 +280,12 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
 
       <div className="space-y-6">
         {/* Season Tabs */}
-        <div className={`flex gap-2 overflow-x-auto pb-2 scrollbar-hide border-b-2 ${colors.cardBorder}`}>
+        <div className={`flex flex-wrap gap-2 pb-3 border-b-2 ${colors.cardBorder}`}>
           {seasons.map(s => (
             <button
               key={s}
               onClick={() => { setActiveSeason(s); setFilterComp('All'); }}
-              className={`px-6 py-3 rounded-t-xl text-base font-black whitespace-nowrap transition-all uppercase tracking-[0.2em] flex items-center gap-2 ${
+              className={`px-4 py-2 md:px-6 md:py-3 rounded-xl text-sm md:text-base font-black whitespace-nowrap transition-all uppercase tracking-[0.15em] md:tracking-[0.2em] flex items-center gap-2 ${
                 activeSeason === s
                   ? `${colors.cardBg} ${colors.primaryText} border-b-4 ${colors.tabActive}`
                   : `${colors.mutedText} hover:${colors.secondaryText} hover:${colors.cardBg}`
@@ -404,6 +404,7 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
           {displayGames.map((game) => (
             <div
               key={game.id}
+              id={`game-${game.id}`}
               className={`${colors.cardBg} rounded-3xl overflow-hidden border-2 ${colors.cardBorder} shadow-2xl group ${colors.cardHoverBorder} transition-all duration-500 ${game.isDnp ? 'opacity-60' : ''}`}
             >
               <div className="p-8">
@@ -606,6 +607,7 @@ export const GameList: React.FC<GameListProps> = ({ games, onEdit, onDelete, act
           {displayGames.map((game) => (
           <div
             key={game.id}
+            id={`game-${game.id}`}
             className={`${colors.cardBg} rounded-2xl border-2 ${colors.cardBorder} shadow-xl group ${colors.cardHoverBorder} transition-all duration-300 ${game.isDnp ? 'opacity-60' : ''}`}
           >
             <div className="p-5 flex items-center gap-4">

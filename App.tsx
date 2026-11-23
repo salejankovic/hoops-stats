@@ -148,8 +148,22 @@ const App: React.FC = () => {
     return comp?.logo;
   };
 
-  // Auto-scroll to top when view changes
+  // Where to return in the list after editing a game
+  const returnToListRef = useRef<{ gameId: string; scrollY: number } | null>(null);
+
+  // Auto-scroll on view change: back to the edited game when returning from the form, otherwise to top
   useEffect(() => {
+    const target = returnToListRef.current;
+    if (view === 'list' && target) {
+      returnToListRef.current = null;
+      requestAnimationFrame(() => {
+        const el = document.getElementById(`game-${target.gameId}`);
+        if (el) el.scrollIntoView({ block: 'center' });
+        else window.scrollTo({ top: target.scrollY });
+      });
+      return;
+    }
+    if (view === 'stats') returnToListRef.current = null;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [view, activeTeam]);
 
@@ -202,6 +216,7 @@ const App: React.FC = () => {
   };
 
   const handleEdit = (game: GameEntry) => {
+    returnToListRef.current = { gameId: game.id, scrollY: window.scrollY };
     setEditingGame(game);
     setView('add');
   };
@@ -466,7 +481,7 @@ const App: React.FC = () => {
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-10">
         <div className={view === 'add' ? 'max-w-4xl mx-auto' : ''}>
-          {view === 'list' && <GameList games={games.filter(g => g.team === activeTeam)} onEdit={handleEdit} onDelete={handleDelete} activeTeam={activeTeam} appSettings={appSettings} />}
+          {view !== 'stats' && <div className={view === 'list' ? '' : 'hidden'}><GameList games={games.filter(g => g.team === activeTeam)} onEdit={handleEdit} onDelete={handleDelete} activeTeam={activeTeam} appSettings={appSettings} /></div>}
           {view === 'stats' && <StatsDashboard games={games.filter(g => g.team === activeTeam)} />}
           {view === 'add' && (
             <GameForm
